@@ -1,0 +1,24 @@
+#!/bin/bash
+
+TRY="/var/log/bind/query.log"
+QUERYLOG=""
+
+for file in $TRY; do
+   if [ -r $file ]; then
+      QUERYLOG=$file
+      break;
+   fi
+done
+
+if test -z $QUERYLOG; then
+   exit 0
+fi
+
+NR=`cat $QUERYLOG | wc -l`
+
+echo "services.bind.graph.title=Number of dns queries"
+echo "services.bind.graph.unit=queries"
+echo "services.bind.line.count.value=$NR"
+echo "services.bind.line.count.type=COUNTER"
+
+rm -f $TEMPFILE

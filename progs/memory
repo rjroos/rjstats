@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+use strict;
+
+my $tmp ;
+
+open FREE, "free -b|";
+while(<FREE>) {
+   my @arr = split /\s+/;
+   if(scalar @arr == 7 && $arr[0] =~ /mem/i ) {
+      $tmp->{total} = $arr[1];
+      $tmp->{buffers} = $arr[5];
+      $tmp->{cached}  = $arr[6];
+	  $tmp->{free} = $arr[3];
+      $tmp->{used} = $arr[2];
+      $tmp->{used} -= $tmp->{buffers};
+      $tmp->{used} -= $tmp->{cached};
+   } else {
+      if ( $arr[0] =~ /swap/i ) {
+         $tmp->{swap}     = $arr[2];
+		 $tmp->{freeswap} = $arr[3];
+      }
+   }
+}
+close FREE;
+
+print "system.memory.graph.title=Memory Usage\n";
+print "system.memory.graph.unit=bytes\n";
+
+my $count = 0;
+for (qw/used cached buffers free swap freeswap/) {
+	my $val = $tmp->{$_};
+	print "system.memory.line.$_.value=$val\n";
+	print "system.memory.line.$_.type=GAUGE\n";
+	if($count == 0) {
+		print "system.memory.line.$_.linetype=AREA\n";
+	} else {
+		print "system.memory.line.$_.linetype=STACK\n";
+	}
+	$count++;
+}

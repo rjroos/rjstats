@@ -1,0 +1,42 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+
+my $cpus ;
+
+my @arr;
+open STAT, "/proc/stat";
+while(<STAT>) {
+   /^cpu(\d+|)/ or next;
+   my $cpu = "cpu$1";
+   my @arr = split /\s+/;
+   $cpus->{$cpu}->{user}   = $arr[1];
+   $cpus->{$cpu}->{nice}   = $arr[2];
+   $cpus->{$cpu}->{system} = $arr[3];
+   $cpus->{$cpu}->{idle}   = $arr[4];
+}
+close STAT;
+
+foreach my $cpu (keys %{$cpus}) {
+	print "system.$cpu.graph.title=CPU times for $cpu\n";
+	print "system.$cpu.graph.unit=%\n";
+
+	my $count = 0;
+	my $max   = 100;
+	if($cpu eq 'cpu') {
+		$max = 100 * (scalar(keys(%{$cpus})) - 1);
+	}
+	for(qw/system user nice idle/) {
+		my $val = $cpus->{$cpu}->{$_};
+		print "system.$cpu.line.$_.value=$val\n";
+		print "system.$cpu.line.$_.type=COUNTER\n";
+		print "system.$cpu.line.$_.min=0\n";
+		print "system.$cpu.line.$_.max=$max\n";
+		if($count==0) {
+			print "system.$cpu.line.$_.linetype=AREA\n";
+		} else {
+			print "system.$cpu.line.$_.linetype=STACK\n";
+		}
+		$count++;
+	}
+}

@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+my $daysup = 0;
+
+open UP, "uptime|";
+while(<UP>) {
+   /(\d+)\s*days/ and do {
+	   $daysup = $1;
+   }
+}
+
+print "system.uptime.graph.title=Uptime in days\n";
+print "system.uptime.line.logins.value=$daysup\n";
+print "system.uptime.line.logins.type=GAUGE\n";

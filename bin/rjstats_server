@@ -1,0 +1,69 @@
+#!/usr/bin/env perl
+use Socket;
+use warnings;
+use strict;
+
+$|=1;
+
+my $server = $ENV{"REMOTE_HOST"};
+my $rjhome = shift;
+my $datadir = shift;
+my $webdir  = shift;
+
+if(!defined($server)) {
+   print "Mazzel\n";
+   exit(0);
+}
+
+if( !defined($rjhome) || !defined($datadir) ) {
+   print "Configuration Error:\n";
+   print "Pass the rjhome and datadir as arguments!\n";
+   exit(0);
+}
+
+my $rjstats = "$rjhome/bin/rjstats";
+if(!-f $rjstats ) {
+   print "Cannot exec $rjstats\n";
+   print "No such file or directory!\n";
+   exit(0);
+}
+
+my $path = "$datadir/$server";
+if(!-d $datadir) {
+   mkdir($datadir);
+}
+if(!-d $path) {
+   mkdir($path);
+}
+
+my $webpath = "$webdir/$server";
+if(!-d $webpath ) {
+   mkdir($webpath );
+}
+if(!-d $webpath ) {
+   mkdir($webpath );
+}
+
+
+
+open STORE, "|$rjstats $path $webpath";
+my $receiving_mode = 0;
+my $linecount = 0;
+
+while(my $line = <STDIN>) {
+   if($line =~ m/^BEGIN DATA/) {
+      print "READY: to receive data\n";
+      $receiving_mode = 1;
+      next;
+   } elsif ($line =~ m/^END DATA/) {
+      print "READY: $linecount lines  received\n";
+      $receiving_mode = 0;
+   } elsif ($line =~ m/^QUIT/ ) {
+      exit(0);
+   }
+   if($receiving_mode) {
+      print STORE $line;
+      $linecount++;
+   }
+}
+close STORE;

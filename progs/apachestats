@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+#Scoreboard Key:
+#"_" Waiting for Connection, "S" Starting up, "R" Reading Request,
+#"W" Sending Reply, "K" Keepalive (read), "D" DNS Lookup,
+#"L" Logging, "G" Gracefully finishing, "." Open slot with no current process
+
+my $names ;
+$names->{"_"} = "waiting";
+$names->{"S"} = "starting";
+$names->{"R"} = "reading";
+$names->{"W"} = "sending";
+$names->{"K"} = "keepalive";
+$names->{"D"} = "dnslookup";
+$names->{"L"} = "logging";
+$names->{"G"} = "graceful";
+$names->{"."} = "openslot";
+
+my $valids = join "", keys %{$names};
+my $regex  = "^[$valids]{64}\$";
+
+my $stats;
+open STATUS, "/usr/sbin/apachectl status 2>/dev/null|" or exit;
+while(<STATUS>) {
+	m/$regex/ or next;
+	chomp;
+	my @arr = split "";
+	foreach(@arr) {
+		$stats->{$_}++;
+	}
+}
+
+print "apache.processes.graph.title = Apache processes\n";
+foreach (keys %{$names}) {
+	my $val = $stats->{$_} || 0;
+	my $key = $names->{$_};
+	print "apache.processes.line.$key.type  = GAUGE\n";
+	print "apache.processes.line.$key.value = $val\n";
+}
+__END__

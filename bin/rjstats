@@ -1,0 +1,330 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+# use RRDs;
+
+my @COLOURS =  qw/
+	66aa66 ffff66 ff3333 000000 aa0000 00aaee
+	33ff66 ff0000 0000ff ffff00 ff00ff 00ffff
+	33ff66 ff0000 0000ff ffff00 ff00ff 00ffff
+	33ff66 ff0000 0000ff ffff00 ff00ff 00ffff
+	/;
+my $BACKGROUND_COLOR="6666cc";
+
+my $DATADIR = shift;
+
+if(!defined($DATADIR)) {
+	die "Usage $0 <datadir>\n";
+}
+if ($DATADIR =~ /^[^\/]/) {
+	$DATADIR = $ENV{PWD}."/".$DATADIR;
+}
+if(!-d $DATADIR) {
+	die "No such file or directory: $DATADIR";
+}
+
+my $WWWDIR = "$DATADIR/php";
+if (! -d $WWWDIR) {
+	mkdir($WWWDIR) or die("$WWWDIR: Cannot create: $!\n");
+}
+
+my $DEBUG = defined($ENV{DEBUG});
+
+package RJStats::Graph;
+
+use File::Basename;
+
+sub new {
+	my $class = shift;
+	my $group = shift;
+	my $name  = shift;
+	my $date  = shift;
+	my $self = {};
+	bless $self, ref($class) || $class;
+	print "RJStats::Graph->new()\n" if $DEBUG;
+	print "{$group, $name}\n" if $DEBUG;
+	$self->{group} = $group;
+	$self->{name}  = $name;
+	$self->{date}  = defined($date) ? $date : "N";
+	$self->{title} = undef;
+	$self->{unit}  = undef;
+	return $self;
+}
+
+sub getLine {
+	my $self = shift;
+	my $name = shift;
+	if(!defined($self->{lines}->{$name})) {
+		my $order = scalar keys %{$self->{lines}};
+		my $line = RJStats::Line->new($self, $name, $order);
+		$self->{lines}->{$name} = $line;
+	}
+	return $self->{lines}->{$name};
+}
+
+sub getLines {
+	my $self = shift;
+	return sort {$a->{order} <=> $b->{order}} (values %{$self->{lines}});
+}
+
+sub save {
+	my $self = shift;
+	if(!-f $self->_getFile()) {
+		$self->_create();
+	}
+	$self->_update();
+}
+
+sub print {
+	my $self = shift;
+	printf("%s.%s [%s]\n", $self->{group},$self->{name},$self->_getFile());
+	foreach my $line ($self->getLines()) {
+		$line->print();
+	}
+	foreach (@{$self->{raw}}) {
+		print $_. "\n";
+	}
+}
+
+sub writePHP {
+	my $self = shift;
+}
+
+sub _create {
+	my $self = shift;
+	my $file = $self->_getFile();
+	my $dir = `dirname $file`;
+	chomp $dir;
+	if(!-d "$dir") {
+		mkdir($dir) or die "$!: $dir";
+	}
+	my @args = ();
+	push @args, $file;
+	foreach my $line ($self->getLines()) {
+		push @args, $line->getCreateString();
+	}
+	push @args, "RRA:AVERAGE:0.5:1:2016";  # 1 week of 5 minute samples.
+	push @args, "RRA:AVERAGE:0.5:6:2976";  # 2 months of 30 minute samples.
+	push @args, "RRA:AVERAGE:0.5:24:8760"; # 2 years of 2 hour samples.
+	print "create @args\n" if $DEBUG;
+	chdir($dir);
+	qx/rrdtool create @args/;
+	#RRDs::create(@args) or die RRDs::error;
+}
+
+sub _update {
+	my $self = shift;
+	my @args = ();
+	push @args, $self->_getFile();
+	my %tmpHash;
+	foreach my $line ($self->getLines()) {
+		my $val = $line->{value};
+		$tmpHash{$line->{name}} = $val;
+	}
+	push @args, "--template";
+	push @args, join(":", keys %tmpHash);
+	push @args, $self->{date}.":".join(":", values %tmpHash);
+	print "update @args\n" if $DEBUG;
+	#RRDs::update(@args) or die RRDs::error;
+	qx/rrdtool update @args/;
+}
+
+# sub _info {
+# 	my $self = shift;
+# 	my $hash = RRDS::info $self->_getFile() or die RRDs::error;
+# 	my $info = {};
+# }
+
+sub writePHPfile {
+	my $self = shift;
+	my $start = time() - 3 * 3600;
+	my $title = $self->{group}."/".$self->{name};
+	if(defined($self->{title})) {
+		$title .= " - ".$self->{title};
+	}
+
+	my $imgfile = "-";
+
+	my @args = ();
+	push @args, "rrdtool";
+	push @args, "graph";
+	push @args, "--imgformat PNG";
+	push @args, "--width 900";
+	#push @args, "--height 800";
+	push @args, "--start '.\$start.'";
+	push @args, "--title \"$title\"";
+	#push @args, "--alt-autoscale-max";
+	push @args, "--lower-limit=0";
+	push @args, "--color";
+	push @args, "CANVAS#$BACKGROUND_COLOR";
+	if(defined($self->{unit})) {
+		push @args, "--vertical-label \"".$self->{unit}."\"";
+	}
+	push @args, $imgfile;
+	my $longestlabel = 0;
+	foreach my $line ($self->getLines()) {
+		my $label = $line->{label};
+		$longestlabel = length($label) if length($label) > $longestlabel;
+	}
+
+	push @args, "COMMENT:\""." "x($longestlabel+3)."\"";
+	push @args, "COMMENT:\"    Current   Average   Minimum   Maximum\\n\"";
+	foreach my $line ($self->getLines()) {
+		my $min      = $line->{min};
+		my $max      = $line->{max};
+		my $name     = $line->{name};
+		my $linetype = $line->{linetype};
+		my $color    = $line->{color};
+		my $label    = $line->{label};
+		push @args, "DEF:def_$name=".$self->_getFile().":$name:AVERAGE";
+		if($min ne 'U' && $max ne 'U') {
+			push @args, "CDEF:cdef_$name=def_$name,$min,$max,LIMIT";
+		} else {
+			push @args, "CDEF:cdef_$name=def_$name";
+		}
+		push @args, "$linetype:cdef_$name#$color:\"$label\"";
+		push @args, "COMMENT:\""." "x(1+$longestlabel-length($label))."\"";
+        push @args, "GPRINT:cdef_$name:LAST:\"%7.2lf\%S\"";
+        push @args, "GPRINT:cdef_$name:AVERAGE:\"%7.2lf\%S\"";
+        push @args, "GPRINT:cdef_$name:MIN:\"%7.2lf\%S\"";
+        push @args, "GPRINT:cdef_$name:MAX:\"%7.2lf\%S\\n\"";
+	}
+
+	my $cmd = qq/@args/;
+	open OUT, ">".$self->_getPhpFile() or die $!;
+	print OUT "<?php\n";
+	print OUT "\$start = \$_REQUEST['start'];\n";
+	print OUT "if(!is_numeric(\$start)) {\n";
+	print OUT "\t\$start = time() - 24 * 3600 * 3;\n";
+	print OUT "}\n";
+	print OUT "\$command = array();\n";
+	foreach(@args) {
+		print OUT "\$command[] = '".$_."';\n";
+	}
+	print OUT "\$command[] = '2>&1';\n";
+	print OUT "\$cmd = join(' ', \$command);\n";
+	print OUT "if(!isset(\$_REQUEST['debug'])) {\n";
+	print OUT "\theader('Content-type: image/png');\n";
+	print OUT "}\n";
+	print OUT "passthru(\$cmd);\n";
+	print OUT "?>\n";
+	close OUT;
+}
+
+sub _getFile {
+	my $self = shift;
+	return sprintf("%s/%s/%s.rrd", $DATADIR, $self->{group}, $self->{name});
+}
+
+sub _getPhpFile {
+	my $self = shift;
+	my $file = sprintf("%s/%s/%s.php", $WWWDIR, $self->{group}, $self->{name});
+	my $dir = dirname($file);
+	if(!-d $dir) {
+		`mkdir -p $dir`;
+	}
+	return $file;
+}
+
+package RJStats::Line;
+
+sub new {
+	my $class = shift;
+	my $graph = shift;
+	my $name  = shift;
+	my $order = shift;
+	my $self = {};
+	bless $self, ref($class) || $class;
+	print "RJStats::Line->new()\n" if $DEBUG;
+	print "{$graph, $name}\n" if $DEBUG;
+	$self->{graph}     = $graph;
+	$self->{name}      = $name;
+	$self->{order}     = $order;
+	$self->{heartbeat} = 600; # max time between updates.
+	$self->{min}       = 'U'; # unknown
+	$self->{max}       = 'U'; # unknown
+	$self->{type}      = 'ABSOLUTE';
+	$self->{value}     = 0;
+	$self->{color}     = $COLOURS[$order];
+	$self->{linetype}  = ($order==0 ? 'AREA' : 'LINE1');
+	$self->{label}     = $self->{name};
+	return $self;
+}
+
+sub print {
+	my $self = shift;
+	printf("\t%s\n", $self->{name});
+	foreach my $prop (keys %{ $self }) {
+		printf("\t\t%s\t=%s\n", $prop, $self->{$prop});
+	}
+}
+
+sub getCreateString {
+	my $self = shift;
+	return sprintf("DS:%s:%s:%s:%s:%s",
+		$self->{name},
+		$self->{type},
+		$self->{heartbeat},
+		$self->{min},
+		$self->{max});
+}
+
+package main;
+
+my $graphs;
+my $date;
+
+sub trim {
+	my $val = shift;
+	$val =~ s/^\s+//;
+	$val =~ s/\s+$//;
+	return $val;
+}
+
+while(my $line = <STDIN>) {
+	chomp $line;
+	$line =~ /^DATE=(\d+)$/ and do { $date = $1 ; next ;};
+	my ($key, $value) = split /=/, $line, 2 or next;
+	my ($group, $name, $object, $prop, $propName) = split /\./, $key;
+
+	if(!defined($group) || !defined($name) || !defined($object) ||
+		!defined($prop) || !defined($value) ) {
+		next;
+	}
+	my $graph = getGraph($group, $name, $date);
+	push @{$graph->{raw}},  $line;
+	for($object) {
+		if (/graph/) {
+			$graph->{trim($prop)} = trim($value);
+		} elsif (/line/) {
+			$line = $graph->getLine($prop);
+			$propName = trim($propName);
+			$line->{trim($propName)} = trim($value);
+		} else {
+			warn "Unknown object '$object' (expect 'line' or 'graph')\n";
+		}
+	}
+}
+
+foreach my $group (keys %{$graphs}) {
+	foreach my $name (keys %{$graphs->{$group}}) {
+		my $graph = $graphs->{$group}->{$name};
+		#$graph->print();
+		$graph->save();
+		if(defined($WWWDIR)) {
+			$graph->writePHPfile();
+		}
+	}
+}
+
+sub getGraph {
+	my $group = shift;
+	my $name  = shift;
+	if(!defined($graphs->{$group}->{$name})) {
+		my $graph = RJStats::Graph->new($group,$name);
+		$graphs->{$group}->{$name} = $graph;
+	}
+	return $graphs->{$group}->{$name};
+}

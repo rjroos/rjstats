@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+my $stats;
+open I, "df -m|";
+while(<I>) {
+	m#/dev/(\S+)\s+(\d+)\s+(\d+)\s+\d+# or next;
+	$stats->{$1} = [$2, $3];
+}
+close I;
+
+foreach my $dev (keys %{$stats}) {
+	my $graph = "diskusage.$dev";
+	my ($total, $used) = @{$stats->{$dev}};
+	print "$graph.graph.title=Disk Usage for $dev\n";
+	print "$graph.graph.unit=kb\n";
+	print "$graph.line.used.value=$used\n";
+	print "$graph.line.used.type=GAUGE\n";
+	print "$graph.line.total.value=$total\n";
+	print "$graph.line.total.type=GAUGE\n";
+}

@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+my $s;
+
+open STATS, "echo show status | mysql --host=localhost -N 2>&1|" ;
+
+while(<STATS>) {
+	/^ERROR/ and exit 0;
+   my ($key,$value) = split /\s+/;
+   $s->{$key} = $value;
+}
+
+print "services.mysql-connections.graph.title=Mysql Connections\n";
+print "services.mysql-connections.graph.unit=Connections\n";
+print "services.mysql-connections.line.connections.value=".$s->{Connections}."\n";
+print "services.mysql-connections.line.connections.type=COUNTER\n";
+
+print "services.mysql-queries.graph.title=Number of Mysql Queries\n";
+print "services.mysql-queries.graph.unit=Number of queries\n";
+foreach my $key ( qw/Com_insert Com_update Com_select Com_delete/ ) {
+   print "services.mysql-queries.line.$key.value=".$s->{$key}."\n";
+   print "services.mysql-queries.line.$key.type=COUNTER\n";
+}
+close STATS;

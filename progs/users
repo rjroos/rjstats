@@ -1,0 +1,12 @@
+#!/usr/bin/perl -w
+use strict;
+
+open W, "w|";
+while(<W>) {
+   /(\d+)\s*user/ and do {
+      print "system.users.graph.title=Logged in users\n";
+      print "system.users.line.logins.value=$1\n";
+      print "system.users.line.logins.type=GAUGE\n";
+      exit(0);
+   }
+}

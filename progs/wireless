@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+use strict;
+
+my $data;
+my $tmp;
+if ( ! -f "/proc/net/wireless" ) { exit; }
+open WLAN, "</proc/net/wireless";
+$tmp = <WLAN>;
+$tmp = <WLAN>;
+while(<WLAN>) {
+   /\s*(\S+):\s*\d+\s*(\d+)/ and do {
+      $data->{$1}->{signal} = $2;
+   }
+
+}
+close WLAN;
+
+foreach my $if ( keys %{ $data } ) {
+   my $signal  = $data->{$if}->{signal} ;
+   print "signal.$if.graph.title = Signal strength of $if\n";
+   print "signal.$if.graph.unit  = Quality/92\n";
+   print "signal.$if.line.in.value = $signal\n";
+   print "signal.$if.line.in.label = Quality low = 0, high = 92\n";
+   print "signal.$if.line.in.type  = GAUGE\n";
+   print "signal.$if.line.in.linetype  = AREA\n";
+}
+

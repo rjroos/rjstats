@@ -1,0 +1,17 @@
+#!/bin/sh
+
+UNIX=`netstat -n | grep ^unix | wc -l`
+TCP_LISTEN=`netstat -na | grep ^tcp | grep LISTEN | wc -l`
+TCP_ACTIVE=`netstat -n | grep ^tcp | grep ESTABLISHED | wc -l`
+UDP=`netstat -n | grep ^udp | wc -l`
+
+echo "system.netstat.graph.title= Netstat connection"
+echo "system.netstat.graph.unit = amount"
+echo "system.netstat.line.unix.value = $UNIX"
+echo "system.netstat.line.unix.type = GAUGE"
+echo "system.netstat.line.tcp_listen.value = $TCP_LISTEN"
+echo "system.netstat.line.tcp_listen.type = GAUGE"
+echo "system.netstat.line.tcp_active.value = $TCP_ACTIVE"
+echo "system.netstat.line.tcp_active.type = GAUGE"
+echo "system.netstat.line.udp.value = $UDP"
+echo "system.netstat.line.udp.type = GAUGE"

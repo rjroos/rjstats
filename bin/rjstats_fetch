@@ -1,0 +1,22 @@
+#!/bin/sh
+
+BASEDIR="`dirname $0`/.."
+
+function go() {
+   dir=$1
+   if ! test -d $dir; then
+      return;
+   fi
+
+   for prog in $dir/*; do
+      if echo $prog | grep "CVS" &>/dev/null ; then
+         continue
+      fi
+      $prog
+   done
+}
+
+echo TIME=`date +%s`
+go /etc/rjstats/local.d
+go /usr/local/etc/rjstats/local.d
+go $BASEDIR/progs

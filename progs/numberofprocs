@@ -1,0 +1,8 @@
+#!/bin/sh
+
+NR=`ps ax | wc -l`
+NR=$(( $NR - 1 ))
+
+echo "system.processes.graph.title=Number of processes"
+echo "system.processes.line.count.value=$NR"
+echo "system.processes.line.count.type=GAUGE"

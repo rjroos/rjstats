@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+use strict;
+
+my ($la1,$la5,$la15);
+
+open LOAD, "</proc/loadavg";
+while(<LOAD>) {
+   /(\S+)\s(\S+)\s(\S+)/ and do {
+      ($la1,$la5,$la15) = ($1,$2,$3);
+      last;
+   }
+}
+close LOAD;
+
+print "system.loadaverage.graph.title=Load average\n";
+print "system.loadaverage.line.lastminute.value=$la1\n";
+print "system.loadaverage.line.lastminute.type=GAUGE\n";
+print "system.loadaverage.line.last5minute.value=$la5\n";
+print "system.loadaverage.line.last5minute.type=GAUGE\n";
+print "system.loadaverage.line.last15minute.value=$la15\n";
+print "system.loadaverage.line.last15minute.type=GAUGE\n";

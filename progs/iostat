@@ -1,0 +1,30 @@
+#!/usr/bin/perl -w
+use strict;
+
+my ($reads, $writes);
+
+open IOSTAT, "iostat|";
+while(<IOSTAT>) {
+   my @arr = split /\s+/;
+   if (scalar @arr == 6) {
+      $reads  = $arr[4] ;
+      $writes = $arr[5] ;
+   }
+}
+close IOSTAT;
+
+$reads =~ m/^\d+$/ or exit 0;
+
+# 1 block = 512 bytes with 2.4 kernels.
+$reads *= 512;
+$writes *= 512;
+
+print "system.iostat.graph.title=Disk I/O\n";
+print "system.iostat.graph.unit=bytes/sec\n";
+print "system.iostat.line.reads.value=$reads\n";
+print "system.iostat.line.reads.type=COUNTER\n";
+print "system.iostat.line.reads.linetype=AREA\n";
+print "system.iostat.line.writes.value=$writes\n";
+print "system.iostat.line.writes.type=COUNTER\n";
+
+
