@@ -1,8 +1,7 @@
 <?
-/* $Id: index.php,v 1.1 2005/03/06 12:40:23 rjroos Exp $ */
+/* $Id: index.php,v 1.2 2005/03/06 12:57:45 rjroos Exp $ */
 
 error_reporting(E_ALL);
-define("RJSTATS_WEB", "/www/intern/htdocs/stats");
 define("RJSTATS_DATA", "/tmp/rjstats");
 
 //class Iterator {
@@ -174,8 +173,11 @@ $computers = array();
 $services  = array();
 foreach($arr as $file) {
 	$tmp = split("/", $file);
-	$computers[] = $tmp[3];
-	$services[] = substr($tmp[4]."/".$tmp[5],0,-4);
+	$iSize = sizeof($tmp);
+	$computers[] = $tmp[$iSize - 3];
+	$sService = $tmp[$iSize - 2]."/".$tmp[$iSize - 1];
+	$sService = substr($sService, 0, -4);
+	$services[] = $sService;
 }
 $computers = array_unique($computers);
 $services  = array_unique($services);
@@ -289,7 +291,8 @@ function doComputer($computer) {
 	$timespan = $_REQUEST['timespan'] or 3600*24*31;
 	$start = time() - $timespan;
 	foreach($_REQUEST['services'] as $service) {
-		$f = "$computer/$service.php";
+		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
+		echo ($f);
 		if(file_exists($f)) {
 			echo("<h4>" .gethostbyaddr($computer)." - $service</h4>\n");
 			echo("<img src='$computer/$service.php?start=$start' /><br/>\n");
