@@ -1,8 +1,7 @@
 <?
-/* $Id: index.php,v 1.2 2005/03/06 12:57:45 rjroos Exp $ */
-
+/* $Id: index.php,v 1.3 2005/03/06 13:08:57 rjroos Exp $ */
 error_reporting(E_ALL);
-define("RJSTATS_DATA", "/tmp/rjstats");
+include("rjstats.conf.inc");
 
 //class Iterator {
 //	var $_arr;
@@ -295,7 +294,7 @@ function doComputer($computer) {
 		echo ($f);
 		if(file_exists($f)) {
 			echo("<h4>" .gethostbyaddr($computer)." - $service</h4>\n");
-			echo("<img src='$computer/$service.php?start=$start' /><br/>\n");
+			echo("<img src='view.php?computer=$computer&service=$service&start=$start' /><br/>\n");
 		}
 	}
 }
