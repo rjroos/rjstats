@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.3 2005/03/06 13:08:57 rjroos Exp $ */
+/* $Id: index.php,v 1.4 2005/03/06 13:14:15 rjroos Exp $ */
 error_reporting(E_ALL);
 include("rjstats.conf.inc");
 
@@ -291,7 +291,6 @@ function doComputer($computer) {
 	$start = time() - $timespan;
 	foreach($_REQUEST['services'] as $service) {
 		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
-		echo ($f);
 		if(file_exists($f)) {
 			echo("<h4>" .gethostbyaddr($computer)." - $service</h4>\n");
 			echo("<img src='view.php?computer=$computer&service=$service&start=$start' /><br/>\n");
