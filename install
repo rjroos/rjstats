@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+function usage() {
+cat << EOF
+Usage: ./configure [options]
+[options]
+	--prefix=<install dir>
+EOF
+#	--data-dir=<data dir>
+exit 1
+}
+
+PREFIX="/usr/local/rjstats";
+
+while test "$#" -gt 0; do
+	KEY=`echo $1 | cut -f1 -d=`
+	VAL=`echo $1 | cut -f2 -d=`
+	[[ -z "$KEY" ]] && usage;
+	[[ -z "$VAL" ]] && usage;
+	case "$KEY" in
+		--prefix)
+			PREFIX=$VAL
+			shift;
+			;;	
+#		--data-dir)
+#			DATADIR=$VAL
+#			shift;
+#			;;	
+		*)
+			usage;
+			;;
+	esac
+done
+DATADIR="$PREFIX/data";
+
+cat << EOF
+rjstats:   $PREFIX
+data:      $DATADIR
+
+Press any key to continue, ctrl-c to abort
+EOF
+read y
+
+if ! test -d "$PREFIX"; then
+	echo "Creating $PREFIX"
+	mkdir "$PREFIX" || exit 1
+fi
+if ! test -d "$DATADIR/127.0.0.1"; then
+	echo "Creating $DATADIR"
+	mkdir -p "$DATADIR/127.0.0.1" || exit 1
+fi
+
+
+cp -r progs $PREFIX || exit 1
+cp -r bin   $PREFIX || exit 1
+cp -r site  $PREFIX || exit 1
+
+cat > $PREFIX/site/rjstats.conf.inc << EOF
+<?php
+	define("RJSTATS_DATA", "$DATADIR");
+?>
+EOF
+
+echo "$PREFIX/bin/rjstats_fetch | $PREFIX/bin/rjstats $DATADIR/127.0.0.1" > $PREFIX/cron.sh
+chmod +x "$PREFIX/cron.sh"
+
+cat > $PREFIX/xinetd.conf <<EOF
+service rjstats
+{
+        disable         = no
+        socket_type     = stream
+        wait            = no
+        user            = rj
+        group           = users
+        protocol        = tcp
+        port            = 2500
+        server          = $PREFIX/bin/rjstats_server
+		server_args     = $PREFIX $DATADIR
+EOF

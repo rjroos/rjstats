@@ -1,7 +1,7 @@
 <?
-/* $Id: index.php,v 1.1 2005/04/10 12:22:30 rjroos Exp $ */
+/* $Id: index.php,v 1.2 2005/04/10 12:29:10 rjroos Exp $ */
 error_reporting(E_ALL);
-include("rjstats.conf.inc");
+require("rjstats.conf.inc");
 
 //class Iterator {
 //	var $_arr;
