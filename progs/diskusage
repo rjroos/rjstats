@@ -14,7 +14,7 @@ foreach my $dev (keys %{$stats}) {
 	my $graph = "diskusage.$dev";
 	my ($total, $used) = @{$stats->{$dev}};
 	print "$graph.graph.title=Disk Usage for $dev\n";
-	print "$graph.graph.unit=kb\n";
+	print "$graph.graph.unit=MB\n";
 	print "$graph.line.used.value=$used\n";
 	print "$graph.line.used.type=GAUGE\n";
 	print "$graph.line.total.value=$total\n";
