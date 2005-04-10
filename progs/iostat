@@ -3,28 +3,41 @@ use strict;
 
 my ($reads, $writes);
 
-open IOSTAT, "iostat|";
-while(<IOSTAT>) {
-   my @arr = split /\s+/;
-   if (scalar @arr == 6) {
-      $reads  = $arr[4] ;
-      $writes = $arr[5] ;
-   }
+my $data = {};
+
+my $os = `uname`;
+if ($os =~ m/FreeBSD/) {
+		my @tmp = `/usr/sbin/iostat -dK`;
+		my @ifs = split /\s+/, "$tmp[0]";
+		my @data = split /\s+/, "$tmp[2]";
+		for (my $i = 1 ; $i < scalar(@ifs) ; $i++) {
+			my $if_tmp = $ifs[$i];
+			my $tps = $data[3*$i - 1];
+			my $kpt = $data[3*$i - 2];
+			$data->{$if_tmp}->{reads} = int($tps * $kpt);
+			$data->{$if_tmp}->{writes} = 0;
+		}
+} else {
+		open IOSTAT, "iostat|" || die "Cannot exec iostat.\n";
+		while(<IOSTAT>) {
+				my @arr = split /\s+/;
+				if (scalar @arr == 6) {
+					$data->{$arr[0]}->{reads} = $arr[4] * 512;
+					$data->{$arr[0]}->{writes} = $arr[5] * 512;
+				}
+		}
+		close IOSTAT;
 }
-close IOSTAT;
 
-$reads =~ m/^\d+$/ or exit 0;
+for my $if ( keys %{$data} ) {
+	my $reads = $data->{$if}->{reads};
+	my $writes = $data->{$if}->{writes};
 
-# 1 block = 512 bytes with 2.4 kernels.
-$reads *= 512;
-$writes *= 512;
-
-print "system.iostat.graph.title=Disk I/O\n";
-print "system.iostat.graph.unit=bytes/sec\n";
-print "system.iostat.line.reads.value=$reads\n";
-print "system.iostat.line.reads.type=COUNTER\n";
-print "system.iostat.line.reads.linetype=AREA\n";
-print "system.iostat.line.writes.value=$writes\n";
-print "system.iostat.line.writes.type=COUNTER\n";
-
-
+	print "system.iostat_$if.graph.title=Disk I/O\n";
+	print "system.iostat_$if.graph.unit=bytes/sec\n";
+	print "system.iostat_$if.line.reads.value=$reads\n";
+	print "system.iostat_$if.line.reads.type=COUNTER\n";
+	print "system.iostat_$if.line.reads.linetype=AREA\n";
+	print "system.iostat_$if.line.writes.value=$writes\n";
+	print "system.iostat_$if.line.writes.type=COUNTER\n";
+}

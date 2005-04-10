@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 BASEDIR="`dirname $0`/.."
+
+PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin
+export PATH
 
 function go() {
    dir=$1

@@ -4,13 +4,25 @@ use strict;
 my $data;
 my $tmp;
 
-open IFCONFIG, "/sbin/ifconfig -v|";
-while(<IFCONFIG>) {
-   /^([^\s]+)\s/ and $tmp = $1;
-   /RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1;
-   /TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1;
+my $os = `uname`;
+if ($os =~ m/FreeBSD/) {
+	open NETSTAT, "/usr/bin/netstat -f link -bi|";
+	while (<NETSTAT>) {
+		/^Name/	and next;
+		my @tmp = split('\s+');
+		$data->{$tmp[0]}->{in} = $tmp[6];
+		$data->{$tmp[0]}->{out} = $tmp[7];
+	}
+	close NETSTAT;
+} else {
+	open IFCONFIG, "/sbin/ifconfig -v|";
+	while(<IFCONFIG>) {
+		/^([^\s]+)\s/ and $tmp = $1;
+		/RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1;
+  		/TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1;
+	}
+	close IFCONFIG;
 }
-close IFCONFIG;
 
 foreach my $if ( keys %{ $data } ) {
    my $in  = $data->{$if}->{in} ;

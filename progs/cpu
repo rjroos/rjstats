@@ -5,7 +5,13 @@ use warnings;
 my $cpus ;
 
 my @arr;
-open STAT, "/proc/stat";
+
+my $os = `uname`;
+if ($os =~ m/FreeBSD/) {
+	open STAT, "/compat/linux/proc/stat";
+} else {
+	open STAT, "/proc/stat";
+}
 while(<STAT>) {
    /^cpu(\d+|)/ or next;
    my $cpu = "cpu$1";
