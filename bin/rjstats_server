@@ -8,7 +8,6 @@ $|=1;
 my $server = $ENV{"REMOTE_HOST"};
 my $rjhome = shift;
 my $datadir = shift;
-my $webdir  = shift;
 
 if(!defined($server)) {
    print "Mazzel\n";
@@ -36,17 +35,7 @@ if(!-d $path) {
    mkdir($path);
 }
 
-my $webpath = "$webdir/$server";
-if(!-d $webpath ) {
-   mkdir($webpath );
-}
-if(!-d $webpath ) {
-   mkdir($webpath );
-}
-
-
-
-open STORE, "|$rjstats $path $webpath";
+open STORE, "|$rjstats $path";
 my $receiving_mode = 0;
 my $linecount = 0;
 
