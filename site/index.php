@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.4 2005/03/06 13:14:15 rjroos Exp $ */
+/* $Id: index.php,v 1.1 2005/04/10 12:22:30 rjroos Exp $ */
 error_reporting(E_ALL);
 include("rjstats.conf.inc");
 
