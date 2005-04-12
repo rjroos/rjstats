@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# $Id: rjstats_send,v 1.2 2005/04/12 10:38:45 javakoe Exp $
+
 use strict;
 use warnings;
 use IO::Socket::INET;

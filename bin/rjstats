@@ -1,4 +1,6 @@
 #!/usr/bin/env perl
+#
+# $Id: rjstats,v 1.2 2005/04/12 10:38:45 javakoe Exp $
 
 use warnings;
 use strict;

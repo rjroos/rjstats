@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# $Id: rjstats_server,v 1.3 2005/04/12 10:38:45 javakoe Exp $
+
 use Socket;
 use warnings;
 use strict;
