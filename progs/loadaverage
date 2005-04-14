@@ -5,7 +5,7 @@ my ($la1,$la5,$la15);
 
 open LOAD, "uptime|" || die "Cannot open uptime.\n";
 while(<LOAD>) {
-   /(\S+),\s(\S+),\s(\S+)/ and do {
+   /: (\S+),\s(\S+),\s(\S+)/ and do {
       ($la1,$la5,$la15) = ($1,$2,$3);
       last;
    }
