@@ -10,16 +10,16 @@ if ($os =~ m/FreeBSD/) {
 	while (<NETSTAT>) {
 		/^Name/	and next;
 		my @tmp = split('\s+');
-		$data->{$tmp[0]}->{in} = $tmp[6];
-		$data->{$tmp[0]}->{out} = $tmp[7];
+		$data->{$tmp[0]}->{in} = $tmp[6] * 8;
+		$data->{$tmp[0]}->{out} = $tmp[7] * 8;
 	}
 	close NETSTAT;
 } else {
 	open IFCONFIG, "/sbin/ifconfig -v|";
 	while(<IFCONFIG>) {
 		/^([^\s]+)\s/ and $tmp = $1;
-		/RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1;
-  		/TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1;
+		/RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1 * 8;
+  		/TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1 * 8;
 	}
 	close IFCONFIG;
 }
@@ -28,11 +28,11 @@ foreach my $if ( keys %{ $data } ) {
    my $in  = $data->{$if}->{in} ;
    my $out = $data->{$if}->{out} ;
    print "bandwidth.$if.graph.title = Bandwith usage for $if\n";
-   print "bandwidth.$if.graph.unit  = Bytes/second\n";
-   print "bandwidth.$if.line.in.label = Incoming bytes per second\n";
+   print "bandwidth.$if.graph.unit  = bits / second\n";
+   print "bandwidth.$if.line.in.label = Incoming\n";
    print "bandwidth.$if.line.in.type  = COUNTER\n";
    print "bandwidth.$if.line.in.value = $in\n";
-   print "bandwidth.$if.line.out.label = Outgoing bytes per second\n";
+   print "bandwidth.$if.line.out.label = Outgoing\n";
    print "bandwidth.$if.line.out.type  = COUNTER\n";
    print "bandwidth.$if.line.out.value = $out\n";
 }
