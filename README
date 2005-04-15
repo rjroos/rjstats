@@ -1,30 +1,69 @@
-$Id: README,v 1.1 2005/03/06 12:40:23 rjroos Exp $
+$Id: README,v 1.2 2005/04/15 07:23:46 rjroos Exp $
 
-Written by Robbert-Jan Roos
+Massive monitoring tool for linux.
+http://rjstats.sourceforge.net/
+Robbert-Jan Roos (rj <at> roos.ws)
+--
 
+REQUIREMENTS
+============
+- A computer with linux 2.4/linux 2.6/FreeBSD 5.
+  Others might work but are not tested.
+- rrdtool
+- perl
+- bash
+- A webserver with php support.
 
-1. Usage:
-
-There are 2 modes of operation. One is for a local system and the other is as a
-client-server setup.
-
-1.1 Local system only:
-
-set up a crontab that does 
-$RJHOME/bin/rjstats_fetch | $RJHOME/bin/rjstats <datadir> <wwwdir>
-every 5 minutes and you're done.
-
-1.2 Remote system.
-You need to setup an xinetd service for $RJHOME/bin/rjstats_server. An example
-config file for xinetd can be found in $RJHOME/conf/rjstats.xinetd. After that
-you need to run rjstats_send <server_ip> on each of your clients you want
-statistics from.
+Since the program is quite modular some collectors might require extra 
+programs. We cannot collect mysql statistics if there is no mysql server
+running.
 
 
-2.1 Todo & Bugs.
+INSTALLATION FOR A SINGLE HOST
+==============================
+Step 1: Fix the collectors
+To install run the install script. Use install --prefix=/installdir to install
+to /installdir. The install script will create a cron.sh file in the
+installation dir.  Put this in a crontab to run every 5 minutes:
+*/5 * * * * /tmp/rjstats/cron.sh
 
+Step 2: Fix the viewing
+The install directory contains a 'site' directory. Make this directory
+accessible from your webserver. You might want to setup some security for
+rjstats as well. Probably a symlink will work:
+ln -s /installdir/site /var/www/rjstats
+
+Step 3: View the graphs
+Point your browser to the location you've made rjstats available for and you
+should see a list of available graphs (Do this after the cron.sh entry has run).
+Now get some coffee and wait for 30 minutes to get some real values in there.
+
+
+## TODO
+## INSTALLATION FOR A NETWORK
+## ==========================
+## It is possible to have 1 rjstats server where other computers send there 
+## data to. Currently there is no form of security whatsoever so be warned.  At my
+## work we run this setup on all our linux servers inside a private network where
+## only company administrators have access, so we consider it secure enough. Do not
+## put this on an internet accessible host unless you know what you're doing.
+## 
+## Step 1: Fix the server
+## At this time it only works with xinetd. inetd is not supported. You will have to
+## add an entry to /etc/services:
+## rjstats 2500/tcp
+## A xinetd config file is created in /installdir. Copy this file to your xinetd
+## installation and restart xinetd. Check the logs for errors, if everything goes
+## well xinetd is now listening on tcp port 2500. You might want to consider
+## security at this point.
+## 
+## Step 2: Fix the collectors
+
+
+TODO & BUGS
+===========
 - Make it portable to other unices(Only works on linux)
 - Think of more things to monitor
 - Add support for other rrd-functions then AVERAGE. (users should be MAX)
-- Add change capability to rrd datastores. ( now then can only be created or
-  updated )
+- Add change capability to rrd datastores. (now they can only be created or
+  updated, if one changes you will have to throw away the graph)
