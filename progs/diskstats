@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+if (!-f "/proc/diskstats") {
+	return;
+}
+
+sub writeDevice {
+	my ($major, $minor, $name, $rio, $rmerge, $rsect, $ruse, 
+			$wio, $wmerge, $wsect, $wuse, $running, $use, $aveq) = @_;
+	if ($rio + $wio == 0) {
+		return;
+	}
+	print "diskstats.tps_$name.graph.title = Transactions for device $name\n";
+	print "diskstats.tps_$name.graph.unit  = transactions/sec\n";
+	print "diskstats.tps_$name.line.reads.value = $rio\n";
+	print "diskstats.tps_$name.line.reads.type  = COUNTER\n";
+	print "diskstats.tps_$name.line.writes.value = $wio\n";
+	print "diskstats.tps_$name.line.writes.type  = COUNTER\n";
+	print "diskstats.sectors_$name.graph.title = Sectors for device $name\n";
+	print "diskstats.sectors_$name.graph.unit  = sectors/sec\n";
+	print "diskstats.sectors_$name.line.reads.value = $rsect\n";
+	print "diskstats.sectors_$name.line.reads.type  = COUNTER\n";
+	print "diskstats.sectors_$name.line.writes.value = $wsect\n";
+	print "diskstats.sectors_$name.line.writes.type  = COUNTER\n";
+}
+
+sub writePartition {
+	my ($major, $minor, $name, $rio, $rsect, $wio, $wsect) = @_;
+	if ($rio + $wio == 0) {
+		return;
+	}
+	print "diskstats.tps_$name.graph.title = Transactions for partition $name\n";
+	print "diskstats.tps_$name.graph.unit  = transactions/sec\n";
+	print "diskstats.tps_$name.line.reads.value = $rio\n";
+	print "diskstats.tps_$name.line.reads.type  = COUNTER\n";
+	print "diskstats.tps_$name.line.writes.value = $wio\n";
+	print "diskstats.tps_$name.line.writes.type  = COUNTER\n";
+	print "diskstats.sectors_$name.graph.title = Sectors for partition $name\n";
+	print "diskstats.sectors_$name.graph.unit  = sectors/sec\n";
+	print "diskstats.sectors_$name.line.reads.value = $rsect\n";
+	print "diskstats.sectors_$name.line.reads.type  = COUNTER\n";
+	print "diskstats.sectors_$name.line.writes.value = $wsect\n";
+	print "diskstats.sectors_$name.line.writes.type  = COUNTER\n";
+
+}
+
+my $parts;
+my $devs;
+
+open P, "/proc/diskstats" || die "/proc/diskstats: $!\n";
+while (<P>) {
+	chomp;
+	s/^\s*//;
+	my @arr = split m/\s+/;
+	if (scalar @arr == 14) {
+		writeDevice(@arr);
+	} elsif (@arr == 7) {
+		writePartition(@arr);
+	} else {
+		print scalar @arr, "\n";
+	}
+}
+close P;
