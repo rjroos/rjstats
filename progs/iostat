@@ -18,13 +18,22 @@ if ($os =~ m/FreeBSD/) {
 			$data->{$if_tmp}->{writes} = 0;
 		}
 } else {
-		open IOSTAT, "iostat|" || die "Cannot exec iostat.\n";
+		open IOSTAT, "/proc/diskstats" || die "/proc/diskstats: $!\n";
 		while(<IOSTAT>) {
-				my @arr = split /\s+/;
-				if (scalar @arr == 6) {
-					$data->{$arr[0]}->{reads} = $arr[4] * 512;
-					$data->{$arr[0]}->{writes} = $arr[5] * 512;
-				}
+			chomp;
+			my $do = 0;
+			my @arr = split /\s+/;
+			#print "@arr\n";
+			#print scalar @arr, "\n";
+			if (scalar(@arr) == 15) {
+				my $dev = $arr[3];
+				splice(@arr, 0, 4);
+				my $sum = 0;
+				map  { $sum += $_ } @arr; 
+				next unless ($sum > 0);
+				$data->{$dev}->{reads} = $arr[4] * 512;
+				$data->{$dev}->{writes} = $arr[5] * 512;
+			}
 		}
 		close IOSTAT;
 }
