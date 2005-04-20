@@ -76,4 +76,5 @@ service rjstats
         port            = 2500
         server          = $PREFIX/bin/rjstats_server
 		server_args     = $PREFIX $DATADIR
+}
 EOF
