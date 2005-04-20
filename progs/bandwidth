@@ -27,12 +27,12 @@ if ($os =~ m/FreeBSD/) {
 foreach my $if ( keys %{ $data } ) {
    my $in  = $data->{$if}->{in} ;
    my $out = $data->{$if}->{out} ;
-   print "bandwidth.$if.graph.title = Bandwith usage for $if\n";
-   print "bandwidth.$if.graph.unit  = bits / second\n";
-   print "bandwidth.$if.line.in.label = Incoming\n";
-   print "bandwidth.$if.line.in.type  = COUNTER\n";
-   print "bandwidth.$if.line.in.value = $in\n";
-   print "bandwidth.$if.line.out.label = Outgoing\n";
-   print "bandwidth.$if.line.out.type  = COUNTER\n";
-   print "bandwidth.$if.line.out.value = $out\n";
+   print "traffic.$if.graph.title = Bandwith usage for $if\n";
+   print "traffic.$if.graph.unit  = bits / second\n";
+   print "traffic.$if.line.in.label = Incoming\n";
+   print "traffic.$if.line.in.type  = COUNTER\n";
+   print "traffic.$if.line.in.value = $in\n";
+   print "traffic.$if.line.out.label = Outgoing\n";
+   print "traffic.$if.line.out.type  = COUNTER\n";
+   print "traffic.$if.line.out.value = $out\n";
 }

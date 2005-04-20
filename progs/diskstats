@@ -3,7 +3,7 @@ use warnings;
 use strict;
 
 if (!-f "/proc/diskstats") {
-	return;
+	exit(0);
 }
 
 sub writeDevice {
