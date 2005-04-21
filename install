@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# $Id: install,v 1.3 2005/04/21 16:13:47 javakoe Exp $
 
 function usage() {
 cat << EOF
