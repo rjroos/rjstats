@@ -1,9 +1,20 @@
 #! /bin/sh
-# $Id: openfiles,v 1.1 2005/04/21 16:14:24 javakoe Exp $
+# $Id: openfiles,v 1.2 2005/04/21 16:21:25 javakoe Exp $
+
+SYSCTL=/sbin/sysctl
+
+if test `uname` = "FreeBSD"
+then
+	OPENFILES=`$SYSCTL -n kern.openfiles`
+	MAXFILES=`$SYSCTL -n kern.maxfiles`
+else
+	OPENFILES=`$SYSCTL -n fs.file-nr | cut -f 3`
+	MAXFILES=`$SYSCTL -n fs.file-max`
+fi
 
 echo "system.openfiles.graph.title=Open filedescriptors"
-echo "system.openfiles.line.openfiles.value=`sysctl -n kern.openfiles`"
+echo "system.openfiles.line.openfiles.value=$OPENFILES"
 echo "system.openfiles.line.openfiles.type=GAUGE"
-echo "system.openfiles.line.maxfiles.value=`sysctl -n kern.maxfiles`"
+echo "system.openfiles.line.maxfiles.value=$MAXFILES"
 echo "system.openfiles.line.maxfiles.type=GAUGE"
 
