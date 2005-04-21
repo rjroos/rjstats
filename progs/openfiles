@@ -1,0 +1,9 @@
+#! /bin/sh
+# $Id: openfiles,v 1.1 2005/04/21 16:14:24 javakoe Exp $
+
+echo "system.openfiles.graph.title=Open filedescriptors"
+echo "system.openfiles.line.openfiles.value=`sysctl -n kern.openfiles`"
+echo "system.openfiles.line.openfiles.type=GAUGE"
+echo "system.openfiles.line.maxfiles.value=`sysctl -n kern.maxfiles`"
+echo "system.openfiles.line.maxfiles.type=GAUGE"
+
