@@ -1,8 +1,13 @@
-$Id: README,v 1.4 2005/05/08 12:17:15 rjroos Exp $
+$Id: README,v 1.5 2005/05/08 12:46:01 rjroos Exp $
 
 Massive monitoring tool for linux.
 http://rjstats.sourceforge.net/
-Robbert-Jan Roos (rj <at> roos.ws)
+
+Written by Robbert-Jan Roos
+FreeBSD support by Ronald Klop
+
+Redirect all questions to the mailing list:
+http://lists.sourceforge.net/lists/listinfo/rjstats-users
 --
 
 Documentation
