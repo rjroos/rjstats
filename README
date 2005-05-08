@@ -1,131 +1,243 @@
-$Id: README,v 1.3 2005/05/08 10:58:38 rjroos Exp $
-vim: tw=70
+$Id: README,v 1.4 2005/05/08 12:17:15 rjroos Exp $
 
 Massive monitoring tool for linux.
 http://rjstats.sourceforge.net/
 Robbert-Jan Roos (rj <at> roos.ws)
 --
 
-REQUIREMENTS
-============
-- A computer with linux 2.4/linux 2.6/FreeBSD 5.
-  Others might work but are not tested.
-- rrdtool
-- perl
-- bash
-- A webserver with php support.
+Documentation
 
-Since the program is quite modular some collectors might require extra 
-programs. We cannot collect mysql statistics if there is no mysql server
-running.
+Requirements
 
+     * A computer with linux 2.4/linux 2.6/FreeBSD 5
+     * rrdtool
+     * perl
+     * bash
+     * A webserver with php support
 
-INSTALLATION FOR A SINGLE HOST
-==============================
+   Since the program is quite modular some collectors require extra
+   programs. It is impossible to collect mysql statistics if there is no
+   mysql server running.
+
+Installation for a single host
 
 Step 1: Fix the collectors
 
-To install run the install script. Use 'install --prefix=/installdir' to
-install to /installdir. The install script will create a cron.sh file
-in the installation dir. Put this in a crontab to run every 5 minutes:
+   To install run the install script. Use 'install --prefix=/installdir'
+   to install to /installdir. The install script will create a cron.sh
+   file in the installation dir. Put this in a crontab to run every 5
+   minutes:
 */5 * * * * /installdir/cron.sh
-
 
 Step 2: Fix the viewing
 
-/installdir now contains a 'site' directory. Make this directory
-accessible from your webserver. I will not go into details since there
-are a lot of things that can go wrong for every particular webserver
-setup. The most simple thing you can do is create a symlink from your
-webroot to the site directory:
+   /installdir now contains a 'site' directory. Make this directory
+   accessible from your webserver. I will not go into details since there
+   are a lot of things that can go wrong for every particular webserver
+   setup. The most simple thing you can do is create a symlink from your
+   webroot to the site directory:
 ln -s /installdir/site /var/www/rjstats
-You might want to put a .htaccess file in there which limits access to
-the page. If there are any problems look in the logs.
 
+   You might want to put a .htaccess file in there which limits access to
+   the page. If there are any problems look in the logs.
 
 Step 3: View the graphs
 
-Point your browser to the location you've made rjstats available for and you
-should see a list of available graphs (Do this after the cron.sh entry has run).
-Now get some coffee and wait for 30 minutes to get some real values in there.
+   Point your browser to the location you've made rjstats available for
+   and you should see a list of available graphs (Do this after the
+   cron.sh entry has run). Now get some coffee and wait for 30 minutes to
+   get some real values in there.
 
+Installation for a network
 
-INSTALLATION FOR A NETWORK
-==========================
+   It is possible to have 1 rjstats server where other computers send
+   there data to. Currently there is no form of security whatsoever so be
+   warned. At my work we run this setup on all our linux servers inside a
+   private network where only company administrators have access, so we
+   consider it secure enough. Do not put this on an internet accessible
+   host unless you know what you're doing.
 
-It is possible to have 1 rjstats server where other computers send there 
-data to. Currently there is no form of security whatsoever so be warned.  At my
-work we run this setup on all our linux servers inside a private network where
-only company administrators have access, so we consider it secure
-enough. Do not put this on an internet accessible host unless you know
-what you're doing.
-
-I suppose you already have a setup with 1 computer as described above.
-
+   I suppose you already have a setup with 1 computer as described above.
 
 Step 1: Fix the server
 
-At this time it only works with xinetd. inetd is not supported. You will have to
-add an entry to /etc/services:
-
+   At this time it only works with xinetd. inetd is not supported. You
+   will have to add an entry to /etc/services:
 rjstats 2500/tcp
 
-A xinetd config file is created in /installdir. Read it, adjust it to
-your situation and copy it to the correct location (probably
-/etc/xinetd.d). Restart the xinetd server and check your logs for
-errors. If everything went well xinetd is now listening on tcp port
-2500.
+   A xinetd config file is created in /installdir. Read it, adjust it to
+   your situation and copy it to the correct location (probably
+   /etc/xinetd.d). Restart the xinetd server and check your logs for
+   errors. If everything went well xinetd is now listening on tcp port
+   2500.
 
-Now do something creative with security. I suggest you use tcpwrappers
-or iptables to deny all connections to port 2500 except for the ip's
-you want to see graphs for. Use stunnel if you don't want others to
-see your computers' status.
- 
+   Now do something creative with security. I suggest you use tcpwrappers
+   or iptables to deny all connections to port 2500 except for the ip's
+   you want to see graphs for. Use stunnel if you don't want others to
+   see your computers' status.
 
 Step 2: Fix the collectors
 
-Instead of the cron file setup earlier above, you will need to create
-a new one one each host you want to monitor:
+   Instead of the cron file setup earlier above, you will need to create
+   a new one one each host you want to monitor:
 */5 * * * * * /installdir/cron-client.sh
-Inside this file you have to put the ip or hostname of the rjstats
-server.
 
+   Inside this file you have to put the ip or hostname of the rjstats
+   server.
 
 Step 3: View the graphs.
 
-If everything worked out you can now see more computers in your
-browser (wait untill after the first rrdstats_send has run).
+   If everything worked out you can now see more computers in your
+   browser (wait untill after the first rrdstats_send has run).
 
+Known issues
 
-KNOWN ISSUES
-============
-- When you have a lot of servers you want to monitor and they are all
-  synchronized with ntp your rjstats server will have too many inbound
-  connections every 5 minutes. Look at the cps setting from
-  xinetd.conf
-
-- Some plugins are prone to hanging. For example the diskusage program
-  will hang if it is checking a dead mount (cifs/smb or nfs is a good
-  candidate). We circumvented this by a lockfile. Unfortunately other
-  graphs do not get updates when 1 process hangs.
-
-- peak values. Some of the plugins are prone to peak values. I have
-  not yet figured out whether this is a rjstats or rrdtool bug. What i
-  do know is that rrdtool 1.2 (released april 2005) has support for
-  filtering out peak values.
-  Until then your graphs will sometimes get ruined by peaks. There is
-  a solution, but it is not a very nice one. On the server:
-  rrdtool dump ruined_graph.rrd > ruined_graph.xml
-  edit ruined_graph.xml and change the abnormal high value.
-  rrdtool restore ruined_graph.xml ruined_graph.rrd
-
+     * When you have a lot of servers you want to monitor and they are
+       all synchronized with ntp your rjstats server will have too many
+       inbound connections every 5 minutes. Look at the cps setting from
+       xinetd.conf
+     * Some plugins are prone to "hanging". For example the diskusage
+       program will hang if it is checking a dead mount (cifs/smb or nfs
+       is a good candidate). We circumvented this by a lockfile.
+       Unfortunately other graphs do not get updates when 1 process
+       hangs.
+     * peak values. Some of the plugins are prone to peak values. I have
+       not yet figured out whether this is a rjstats or rrdtool bug. What
+       i do know is that rrdtool 1.2 (released april 2005) has support
+       for filtering out peak values.
+       Until then your graphs will sometimes get ruined by peaks. There
+       is a solution, but it is not a very nice one. On the server:
+      rrdtool dump ruined_graph.rrd > ruined_graph.xml
+      edit ruined_graph.xml and change the abnormal high value.
+      rrdtool restore ruined_graph.xml ruined_graph.rrd
 
 TODO
-====
-- Make it portable to other unices (Only works on linux/FreeBSD)
-  (think snmp here).
-- Think of more things to monitor
-- Add support for other rrd-functions then AVERAGE. (users should be MAX)
-- Add change capability to rrd datastores. (now they can only be created or
-  updated, if one changes you will have to throw away the graph)
-- Write a dedicated server instead of relying on xinetd.
+
+     * Make it portable to other unices (Only works on linux/FreeBSD)
+       (think snmp here).
+     * Think of more things to monitor
+     * Add support for other rrd-functions then AVERAGE. (users should be
+       MAX)
+     * Add change capability to rrd datastores. (now they can only be
+       created or updated, if one changes you will have to throw away the
+       graph)
+     * Write a dedicated server instead of relying on xinetd.
+     _________________________________________________________________
+Documentation
+
+Requirements
+
+     * A computer with linux 2.4/linux 2.6/FreeBSD 5
+     * rrdtool
+     * perl
+     * bash
+     * A webserver with php support
+
+   Since the program is quite modular some collectors require extra
+   programs. It is impossible to collect mysql statistics if there is no
+   mysql server running.
+
+Installation for a single host
+
+Step 1: Fix the collectors
+
+   To install run the install script. Use 'install --prefix=/installdir'
+   to install to /installdir. The install script will create a cron.sh
+   file in the installation dir. Put this in a crontab to run every 5
+   minutes:
+*/5 * * * * /installdir/cron.sh
+
+Step 2: Fix the viewing
+
+   /installdir now contains a 'site' directory. Make this directory
+   accessible from your webserver. I will not go into details since there
+   are a lot of things that can go wrong for every particular webserver
+   setup. The most simple thing you can do is create a symlink from your
+   webroot to the site directory:
+ln -s /installdir/site /var/www/rjstats
+
+   You might want to put a .htaccess file in there which limits access to
+   the page. If there are any problems look in the logs.
+
+Step 3: View the graphs
+
+   Point your browser to the location you've made rjstats available for
+   and you should see a list of available graphs (Do this after the
+   cron.sh entry has run). Now get some coffee and wait for 30 minutes to
+   get some real values in there.
+
+Installation for a network
+
+   It is possible to have 1 rjstats server where other computers send
+   there data to. Currently there is no form of security whatsoever so be
+   warned. At my work we run this setup on all our linux servers inside a
+   private network where only company administrators have access, so we
+   consider it secure enough. Do not put this on an internet accessible
+   host unless you know what you're doing.
+
+   I suppose you already have a setup with 1 computer as described above.
+
+Step 1: Fix the server
+
+   At this time it only works with xinetd. inetd is not supported. You
+   will have to add an entry to /etc/services:
+rjstats 2500/tcp
+
+   A xinetd config file is created in /installdir. Read it, adjust it to
+   your situation and copy it to the correct location (probably
+   /etc/xinetd.d). Restart the xinetd server and check your logs for
+   errors. If everything went well xinetd is now listening on tcp port
+   2500.
+
+   Now do something creative with security. I suggest you use tcpwrappers
+   or iptables to deny all connections to port 2500 except for the ip's
+   you want to see graphs for. Use stunnel if you don't want others to
+   see your computers' status.
+
+Step 2: Fix the collectors
+
+   Instead of the cron file setup earlier above, you will need to create
+   a new one one each host you want to monitor:
+*/5 * * * * * /installdir/cron-client.sh
+
+   Inside this file you have to put the ip or hostname of the rjstats
+   server.
+
+Step 3: View the graphs.
+
+   If everything worked out you can now see more computers in your
+   browser (wait untill after the first rrdstats_send has run).
+
+Known issues
+
+     * When you have a lot of servers you want to monitor and they are
+       all synchronized with ntp your rjstats server will have too many
+       inbound connections every 5 minutes. Look at the cps setting from
+       xinetd.conf
+     * Some plugins are prone to "hanging". For example the diskusage
+       program will hang if it is checking a dead mount (cifs/smb or nfs
+       is a good candidate). We circumvented this by a lockfile.
+       Unfortunately other graphs do not get updates when 1 process
+       hangs.
+     * peak values. Some of the plugins are prone to peak values. I have
+       not yet figured out whether this is a rjstats or rrdtool bug. What
+       i do know is that rrdtool 1.2 (released april 2005) has support
+       for filtering out peak values.
+       Until then your graphs will sometimes get ruined by peaks. There
+       is a solution, but it is not a very nice one. On the server:
+      rrdtool dump ruined_graph.rrd > ruined_graph.xml
+      edit ruined_graph.xml and change the abnormal high value.
+      rrdtool restore ruined_graph.xml ruined_graph.rrd
+
+TODO
+
+     * Make it portable to other unices (Only works on linux/FreeBSD)
+       (think snmp here).
+     * Think of more things to monitor
+     * Add support for other rrd-functions then AVERAGE. (users should be
+       MAX)
+     * Add change capability to rrd datastores. (now they can only be
+       created or updated, if one changes you will have to throw away the
+       graph)
+     * Write a dedicated server instead of relying on xinetd.
+     _________________________________________________________________

@@ -1,0 +1,68 @@
+Hacking
+
+   This is a very basic document explaining how the components inside
+   rjstats work together.
+
+Syntax of rjstats files
+
+   The whole idea behind rjstats was to monitor a network of linux
+   servers. [8]rrdtool was the perfect job to do that, but it has a very
+   difficult syntax, so writing each graph manually using rrdtool would
+   be too time consuming. Therefore I slapped toghether a perl script
+   which understands a more human readable syntax.
+
+   Input for rjstats are plain text lines in a dot-seperated property =
+   key format.
+
+   First an example. To create a graph that has a red line at y-axis
+   position 1 you would feed the following to rjstats:
+   examples.redline.graph.title = A red line at number 1
+   examples.redline.graph.unit  = number
+   examples.redline.line.theline.value    = 1
+   examples.redline.line.theline.color    = ff0000
+   examples.redline.line.theline.type     = GAUGE
+   examples.redline.line.theline.linetype = LINE1
+
+
+   Every graph has a group and a name. These two must be unique. There is
+   a "system" group where you can see cpu, memory and disk i/o usage, or
+   a "bandwith" group where graphs for bandwith usage are shown.
+   This means all property names start with group.name.
+
+   After that there are 2 parts of a graph. one "graph" section and one
+   or more lines, defined by "line"
+
+   The graph has 2 properties: the title and the y-axis label.
+   group.name.graph.title = Title of the graph.
+   group.name.graph.unit  = bytes/second.
+
+
+   After that you need to define lines in your graph. Multiple lines are
+   possible. A line is in the form:
+   group.name.line.nameofline.property = value
+
+
+   The following properties are supported:
+     * color - the color of the graph.
+     * ignore - whether this line should be excluded
+     * label - the label in the legend
+     * limit - the maximum value of the line
+     * linetype - One of rrdtools supported lines: AREA, LINE1, LINE2,
+       STACK
+     * type - the type of value: COUNTER, GAUGE
+     * value - the value of the line now.
+
+The files in this packages
+
+   progs/* Where all the collector programs belonging to the package are
+   installed.
+   bin/rjstats This is where the magic happens. It parses rjstats
+   property files and creates or updates graphs in the datadir. The
+   datadir is the first command line option.
+   bin/rjstats_fetch A convenience script to execute all collectors
+   inside the progs directory as well as scripts located in
+   /etc/rjstats/local.d and /usr/local/etc/rjstats/local.d.
+   bin/rjstats_server
+   bin/rjstats_send 2 files for transfering the output from rjstats_fetch
+   over a tcp connection into rjstats on another computer. Used for
+   monitoring entire networks.
