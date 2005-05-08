@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: openfiles,v 1.2 2005/04/21 16:21:25 javakoe Exp $
+# $Id: openfiles,v 1.3 2005/05/08 11:00:34 rjroos Exp $
 
 SYSCTL=/sbin/sysctl
 
@@ -8,7 +8,7 @@ then
 	OPENFILES=`$SYSCTL -n kern.openfiles`
 	MAXFILES=`$SYSCTL -n kern.maxfiles`
 else
-	OPENFILES=`$SYSCTL -n fs.file-nr | cut -f 3`
+	OPENFILES=`$SYSCTL -n fs.file-nr | cut -f 1`
 	MAXFILES=`$SYSCTL -n fs.file-max`
 fi
 
