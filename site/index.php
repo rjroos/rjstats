@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.2 2005/04/10 12:29:10 rjroos Exp $ */
+/* $Id: index.php,v 1.3 2005/05/19 13:09:49 javakoe Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -310,6 +310,7 @@ if(isset($_REQUEST['timespan'])) {
 	}
 }
 ?>
-
+<hr/>
+<a href='http://rjstats.sourceforge.net/'>rjstats</a>
 </body>
 </html>
