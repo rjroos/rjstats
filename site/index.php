@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.3 2005/05/19 13:09:49 javakoe Exp $ */
+/* $Id: index.php,v 1.4 2005/05/19 13:40:47 javakoe Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -191,11 +191,13 @@ function sort_hostname($a, $b) {
 usort($computers, "sort_hostname");
 sort($services);
 ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
 <head>
 <title>RJStats graphs.</title>
-<style>
+<style type='text/css'>
 select {
 	height:300px;
 }
@@ -215,11 +217,10 @@ td {
 </head>
 
 <body>
-
-<hr/>
-
-<a href="?allcomputers=1&services[]=system/cpu&timespan=<?= 3600 * 24 * 2 ?>">All CPU</a>
-<a href="?allcomputers=1&services[]=system/memory&timespan=<?= 3600 * 24 * 2 ?>">All MEM</a>
+<hr>
+<p>
+<a href="?allcomputers=1&amp;services[]=system/cpu&amp;timespan=<?= 3600 * 24 * 2 ?>">All CPU</a>
+<a href="?allcomputers=1&amp;services[]=system/memory&amp;timespan=<?= 3600 * 24 * 2 ?>">All MEM</a>
 <form method='get' action='<?= $_SERVER["PHP_SELF"] ?>'>
 
 <table>
@@ -265,7 +266,7 @@ function radio($var, $lbl) {
 			$selected = 'checked';
 		}
 	}
-	return "<input type='radio' $selected name='timespan' value='$var' id='$var'/><label for='$var'>$lbl</label></input>";
+	return "<input type='radio' $selected name='timespan' value='$var' id='time_$var'/><label for='time_$var'>$lbl</label>";
 }
 ?>
 		<td>
@@ -284,7 +285,7 @@ function radio($var, $lbl) {
 </table>
 </form>
 
-<hr/>
+<hr>
 <?
 function doComputer($computer) {
 	$timespan = $_REQUEST['timespan'] or 3600*24*31;
@@ -293,7 +294,7 @@ function doComputer($computer) {
 		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
 		if(file_exists($f)) {
 			echo("<h4>" .gethostbyaddr($computer)." - $service</h4>\n");
-			echo("<img src='view.php?computer=$computer&service=$service&start=$start' /><br/>\n");
+			echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".gethostbyaddr($computer)." - $service' /><br/>\n");
 		}
 	}
 }
@@ -310,7 +311,16 @@ if(isset($_REQUEST['timespan'])) {
 	}
 }
 ?>
-<hr/>
-<a href='http://rjstats.sourceforge.net/'>rjstats</a>
+<hr>
+<p>
+<a href='http://rjstats.sourceforge.net/'>rjstats</a> - UNIX monitoring
+<p>
+<a href="http://validator.w3.org/check?uri=referer"><img
+    src="http://www.w3.org/Icons/valid-html401"
+    alt="Valid HTML 4.01!" height="31" width="88"></a>
+<a href="http://jigsaw.w3.org/css-validator/"><img
+  style="border: 0; width: 88px; height: 31px"
+    src="http://jigsaw.w3.org/css-validator/images/vcss" 
+    alt="Valid CSS!"></a>
 </body>
 </html>
