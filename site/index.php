@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.6 2005/06/02 08:40:37 javakoe Exp $ */
+/* $Id: index.php,v 1.7 2005/06/02 08:53:09 javakoe Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -333,7 +333,7 @@ if(isset($_REQUEST['timespan'])) {
 ?>
 <hr>
 <p>
-<a href='http://rjstats.sourceforge.net/'>rjstats</a> - UNIX monitoring
+<a href='http://rjstats.sourceforge.net/' target='rjstats.sf.net'>rjstats</a> - UNIX monitoring
 <p>
 <a href="http://validator.w3.org/check?uri=referer"><img
     src="http://www.w3.org/Icons/valid-html401"
