@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.5 2005/06/02 08:37:23 javakoe Exp $ */
+/* $Id: index.php,v 1.6 2005/06/02 08:40:37 javakoe Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -266,7 +266,9 @@ function radio($var, $lbl) {
 			$selected = 'checked';
 		}
 	}
-	return "<input type='radio' $selected name='timespan' value='$var' id='time_$var'/><label for='time_$var'>$lbl</label>";
+	$res = "<input type='radio' $selected name='timespan' value='$var' "
+			."id='time_$var'/><label for='time_$var'>$lbl</label>";
+	return $res;
 }
 ?>
 		<td>
@@ -278,6 +280,16 @@ function radio($var, $lbl) {
 				<li><?= radio(3600*24*21,  "Last 3 weeks") ?></li>
 				<li><?= radio(3600*24*31,  "Last month") ?></li>
 				<li><?= radio(3600*24*365, "Last year") ?></li>
+				<br/>
+				<li><?= radio(-3600, "Last hours") ?></li>
+				<li><?= radio(-3600*24, "Last days") ?></li>
+				<li><?= radio(-3600*24*7, "Last weeks") ?></li>
+				<? $timerepeat = (isset($_REQUEST['timerepeat'])
+									? $_REQUEST['timerepeat']
+									: 1);
+				?>
+				<input type='text' name='timerepeat' value='<?=$timerepeat?>'
+						size='4' maxlength='3'/>
 			</ul>
 			<input type='submit'/>
 		</td>
@@ -289,6 +301,12 @@ function radio($var, $lbl) {
 <?
 function doComputer($computer) {
 	$timespan = $_REQUEST['timespan'] or 3600*24*31;
+	if ($timespan < 0) {
+		$timerepeat = (isset($_REQUEST['timerepeat'])
+							? $_REQUEST['timerepeat']
+							: 1);
+		$timespan = -$timespan * $timerepeat;
+	}
 	$start = time() - $timespan;
 	foreach($_REQUEST['services'] as $service) {
 		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
