@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.4 2005/05/19 13:40:47 javakoe Exp $ */
+/* $Id: index.php,v 1.5 2005/06/02 08:37:23 javakoe Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -104,7 +104,7 @@ class Find {
 				return true;
 			}
 		}
-			return false;
+		return false;
 	}
 
 	function getMatches() {
@@ -305,8 +305,10 @@ if(isset($_REQUEST['timespan'])) {
 			doComputer($computer);
 		}
 	} else {
-		foreach($_REQUEST['computers'] as $computer) {
-			doComputer($computer);
+		if (isset($_REQUEST['computers'])) {
+			foreach($_REQUEST['computers'] as $computer) {
+				doComputer($computer);
+			}
 		}
 	}
 }
