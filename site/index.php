@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.7 2005/06/02 08:53:09 javakoe Exp $ */
+/* $Id: index.php,v 1.8 2009/04/09 10:37:56 rjroos Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -170,13 +170,18 @@ $arr = $f->getMatches();
 
 $computers = array();
 $services  = array();
+$servicegroups = array();
 foreach($arr as $file) {
 	$tmp = split("/", $file);
 	$iSize = sizeof($tmp);
 	$computers[] = $tmp[$iSize - 3];
-	$sService = $tmp[$iSize - 2]."/".$tmp[$iSize - 1];
+	$group = $tmp[$iSize - 2];
+	$sService = $group . "/" . $tmp[$iSize - 1];
 	$sService = substr($sService, 0, -4);
 	$services[] = $sService;
+	if (!in_array($group, $servicegroups)) {
+		$servicegroups[] = $group;
+	}
 }
 $computers = array_unique($computers);
 $services  = array_unique($services);
@@ -214,6 +219,42 @@ td {
 	border:1px solid #000;
 }
 </style>
+<script type='text/javascript'>
+window.onload = function() {updateServices()}
+
+function showService(aGroupsSelected, sService) {
+	if (aGroupsSelected.length == 0) {
+		return true;
+	}
+	var sGroup = sService.split("/")[0];
+	for (var i = 0 ; i < aGroupsSelected.length ; i++) {
+		var s = aGroupsSelected[i];
+		if (sGroup == s) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function updateServices() {
+	var f = document.forms['form'];
+	var aGroups = [];
+	var oGroup = f['servicegroups[]'];
+	for (var i = 0 ; i < oGroup.options.length ; i++) {
+		var oOption = oGroup.options[i];
+		if (oOption.selected) {
+			aGroups.push(oOption.text);
+		}
+	}
+	
+	var oServices = f['services[]'];
+	for (var i = 0 ; i < oServices.options.length ; i++) {
+		var oOption = oServices.options[i];
+		var sDisplay = showService(aGroups, oOption.text) ? "block" : "none";
+		oOption.style.display = sDisplay;
+	}
+}
+</script>
 </head>
 
 <body>
@@ -221,7 +262,9 @@ td {
 <p>
 <a href="?allcomputers=1&amp;services[]=system/cpu&amp;timespan=<?= 3600 * 24 * 2 ?>">All CPU</a>
 <a href="?allcomputers=1&amp;services[]=system/memory&amp;timespan=<?= 3600 * 24 * 2 ?>">All MEM</a>
-<form method='get' action='<?= $_SERVER["PHP_SELF"] ?>'>
+<a href="mysqlservers/">MySql Activity Reports Kantoor</a>
+<a href="userdir/">Userdir stats</a>
+<form method='get' action='<?= $_SERVER["PHP_SELF"] ?>' name='form'>
 
 <table>
 	<tr>
@@ -237,6 +280,19 @@ td {
 				}
 			?>
 				<option<?= $selected ?> value='<?= $pc ?>'><?= $nice ?></option>
+			<? } ?>
+			</select>
+		</td>
+
+		<td>
+			<select name="servicegroups[]" multiple onchange="updateServices()">
+			<? foreach($servicegroups as $sg) {
+				$selected = '';
+				if(@in_array($sg, $_REQUEST['servicegroups'])) {
+					$selected = " selected";
+				}
+			?>
+				<option<?= $selected ?>><?= $sg ?></option>
 			<? } ?>
 			</select>
 		</td>
