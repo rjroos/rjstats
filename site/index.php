@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.8 2009/04/09 10:37:56 rjroos Exp $ */
+/* $Id: index.php,v 1.9 2009/07/13 09:55:06 rjroos Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -254,6 +254,12 @@ function updateServices() {
 		oOption.style.display = sDisplay;
 	}
 }
+
+function toggleFormMethod() {
+	var f = document.forms['form'];
+	f.method = "POST";
+	return true;
+}
 </script>
 </head>
 
@@ -264,6 +270,7 @@ function updateServices() {
 <a href="?allcomputers=1&amp;services[]=system/memory&amp;timespan=<?= 3600 * 24 * 2 ?>">All MEM</a>
 <a href="mysqlservers/">MySql Activity Reports Kantoor</a>
 <a href="userdir/">Userdir stats</a>
+
 <form method='get' action='<?= $_SERVER["PHP_SELF"] ?>' name='form'>
 
 <table>
@@ -347,7 +354,8 @@ function radio($var, $lbl) {
 				<input type='text' name='timerepeat' value='<?=$timerepeat?>'
 						size='4' maxlength='3'/>
 			</ul>
-			<input type='submit'/>
+			<input type='submit' value="GET" />
+			<input type='submit' value="POST" onclick="toggleFormMethod()" />
 		</td>
 	</tr>
 </table>
