@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.9 2009/07/13 09:55:06 rjroos Exp $ */
+/* $Id: index.php,v 1.10 2010/02/10 07:53:48 rjroos Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -191,7 +191,7 @@ function sort_hostname($a, $b) {
 	}
 	$stra = gethostbyaddr($a);
 	$strb = gethostbyaddr($b);
-	return ($stra < $strb) ? -1 : 1;
+	return strnatcmp($stra, $strb);
 }
 usort($computers, "sort_hostname");
 sort($services);
