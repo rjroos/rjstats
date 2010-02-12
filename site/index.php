@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.10 2010/02/10 07:53:48 rjroos Exp $ */
+/* $Id: index.php,v 1.11 2010/02/12 15:31:53 rjroos Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -195,6 +195,7 @@ function sort_hostname($a, $b) {
 }
 usort($computers, "sort_hostname");
 sort($services);
+sort($servicegroups);
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
         "http://www.w3.org/TR/html4/strict.dtd">
