@@ -3,28 +3,6 @@
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
-//class Iterator {
-//	var $_arr;
-//	var $_map;
-//	var $_pointer;
-//
-//	function Iterator($arr) {
-//		$this->_arr = $arr;
-//		$this->_pointer = 0;
-//	}
-//
-//	function hasNext() {
-//		return $this->_pointer < sizeof($this->_arr);
-//	}
-//
-//	function next() {
-//		var_dump($this->_arr);
-//		$obj = $this->_arr[$this->_pointer];
-//		$this->_pointer = $this->_pointer + 1;
-//		return $obj;
-//	}
-//}
-
 class Find {
 	var $_dir;                     // dir to search.
 	var $_recursive     = true;    // find recursively
@@ -187,7 +165,7 @@ $computers = array_unique($computers);
 $services  = array_unique($services);
 
 function getNiceHost($host) {
-	if (strstr($host, "_via_")) {
+	if (!strstr($host, ".")) {
 		return $host;
 	}
 	return gethostbyaddr($host);
@@ -212,8 +190,10 @@ sort($servicegroups);
 <head>
 <title>RJStats graphs.</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
-<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script> 
 <script type='text/javascript' src='http://jackbliss.co.uk/projects/localstorage/min.jquery.saveit.js'></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>    
+<script type='text/javascript' src='stats.js'></script>
 
 <script type='text/javascript'>
 $(document).ready(function() {
@@ -235,7 +215,7 @@ function showService(aGroupsSelected, sService) {
 	return false;
 }
 
-function updateServices() {
+function updateServices_oud() {
 	var f = document.forms['form'];
 	var aGroups = [];
 	var oGroup = f['servicegroups[]'];
@@ -252,6 +232,64 @@ function updateServices() {
 		var sDisplay = showService(aGroups, oOption.text) ? "block" : "none";
 		oOption.style.display = sDisplay;
 	}
+}
+
+function updateServices() {
+	var f = document.forms['form'];
+	var aGroups = [];
+	var oGroup = f['servicegroups[]'];
+	for (var i = 0 ; i < oGroup.options.length ; i++) {
+		var oOption = oGroup.options[i];
+		if (oOption.selected) {
+			aGroups.push(oOption.text);
+		}
+	}
+	
+	var oServices = f['services[]'];
+	var servicesToShow = [];
+	var servicesToHide = [];
+	for (var i = 0 ; i < oServices.options.length ; i++) {
+		var oOption = oServices.options[i];
+		if (showService(aGroups, oOption.text)) {
+			servicesToShow.push(oOption);
+		} else {
+			servicesToHide.push(oOption);
+		}
+	}
+
+	var oHiddenServices = f['hiddenServices[]'];
+	for (var i = 0; i < oHiddenServices.options.length; i++) {
+		var oOption = oHiddenServices.options[i];
+		if (showService(aGroups, oOption.text)) {
+			servicesToShow.push(oOption);
+		} else {
+			servicesToHide.push(oOption);
+		}
+	}
+
+	servicesToShow = servicesToShow.sort(function(oOption1, oOption2){ return oOption1.text.localeCompare(oOption2.text)});
+	servicesToHide = servicesToHide.sort(function(oOption1, oOption2){ return oOption1.text.localeCompare(oOption2.text)});
+
+	$(oServices).empty();
+	$(servicesToShow).each(function(i, oOption) { $(oServices).append(oOption); });
+
+	$(oHiddenServices).empty();
+	$(servicesToHide).each(function(i, oOption) { $(oHiddenServices).append(oOption); });
+
+	if ($(oServices).find("option:selected")) {
+		$(oServices).attr("scrollTop", 17 * $(oServices).find("option:selected").attr("index"));
+	}
+
+}
+function getCharts() {
+	<?php
+		$timespan = $_REQUEST['timespan'];
+		foreach ($_REQUEST['computers'] as $comp) {
+			foreach ($_REQUEST['services'] as $serv) { 
+				echo "fetchChart('$comp', '$serv', $timespan);";
+			}
+		}
+	?>
 }
 
 function toggleFormMethod() {
@@ -286,8 +324,9 @@ function removeSearch(obj) {
 </script>
 </head>
 
-<body>
+<body onload="getCharts()">
 
+<div class="menuwrapper">
 <div class='savedsearchbox'>
 <div class="header">Saved searches (localStorage! not permanent).
 <a href="#" onclick="saveSearch(); return false;">Save this search</a>
@@ -341,6 +380,8 @@ function removeSearch(obj) {
 				<option<?= $selected ?>><?= $s ?></option>
 			<? } ?>
 			</select>
+			<select name="hiddenServices[]" multiple style="display:none">
+			</select>
 		</td>
 
 <?
@@ -359,6 +400,7 @@ function radio($var, $lbl) {
 			."id='time_$var'/><label for='time_$var'>$lbl</label>";
 	return $res;
 }
+
 ?>
 		<td>
 			<ul>
@@ -386,7 +428,8 @@ function radio($var, $lbl) {
 	</tr>
 </table>
 </form>
-
+</div>
+<div class="statswrapper">
 <?
 function doComputer($computer) {
 	$timespan = $_REQUEST['timespan'] or 3600*24*31;
@@ -398,10 +441,11 @@ function doComputer($computer) {
 	}
 	$start = time() - $timespan;
 	foreach($_REQUEST['services'] as $service) {
-		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
+		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
 		if(file_exists($f)) {
 			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
-			echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".getNiceHost($computer)." - $service' /><br/>\n");
+			# we willen een default hashing-achtige truuk zodat alle host/service combo's een id hebben zonder / en andere grappen erin
+			echo("<div id='".base64_encode($computer.$service)."'></div>");
 		}
 	}
 }
@@ -430,5 +474,6 @@ if(isset($_REQUEST['timespan'])) {
   style="border: 0; width: 88px; height: 31px"
     src="http://jigsaw.w3.org/css-validator/images/vcss" 
     alt="Valid CSS!"></a>
+</div>
 </body>
 </html>

@@ -1,3 +1,3 @@
 <?php
-define("RJSTATS_DATA", "/var/rjstats");
+	define("RJSTATS_DATA", "/var/rrdstats");
 ?>

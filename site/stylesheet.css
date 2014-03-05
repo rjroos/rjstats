@@ -30,3 +30,10 @@ div.savedsearchbox li {
 	list-style-type:circle;
 	margin-left:30px;
 }
+
+.statswrapper, .menuwrapper {
+	margin: 50px auto;
+	width: 85%;
+	background: #eee;
+	padding: 30px;
+}
