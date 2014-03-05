@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if test -z "`pgrep perdition.imap4`"; then
+	exit 0
+fi
+
+CLOSE=`grep -c "Close:" /var/log/mail.log`
+CONNECT=`grep -c "Connect:" /var/log/mail.log`
+AUTH_OK=`grep "Auth:" /var/log/mail.log | grep -c "status=\"ok\""`
+AUTH_FAIL=`grep "Auth:" /var/log/mail.log | grep -c "Re-Authentication Failure"`
+CLOSING_NULL=`grep -c "Closing NULL session" /var/log/mail.log`
+OTHER=`grep -v "Close:" /var/log/mail.log | grep -v "Connect:" | grep -v "Auth:" | grep -v "Closing NULL session" | wc -l`
+
+echo "email.perdition.graph.title=Perdition stats"
+echo "email.perdition.line.close.value=$CLOSE"
+echo "email.perdition.line.close.type=COUNTER"
+echo "email.perdition.line.connect.value=$CONNECT"
+echo "email.perdition.line.connect.type=COUNTER"
+echo "email.perdition.line.authok.value=$AUTH_OK"
+echo "email.perdition.line.authok.type=COUNTER"
+echo "email.perdition.line.authfail.value=$AUTH_FAIL"
+echo "email.perdition.line.authfail.type=COUNTER"
+echo "email.perdition.line.closingnullsession.value=$CLOSING_NULL"
+echo "email.perdition.line.closingnullsession.type=COUNTER"
+echo "email.perdition.line.other.value=$OTHER"
+echo "email.perdition.line.other.type=COUNTER"

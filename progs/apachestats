@@ -21,16 +21,8 @@ $names->{"."} = "openslot";
 my $valids = join "", keys %{$names};
 my $regex  = "^[$valids]{64}\$";
 
-my $apache = `locate apachectl | grep "/apachectl\$" | head -n1 2>&1`;
-if ($? != 0) {
-	$apache = `locate apache2ctl | grep "/apache2ctl\$" | head -n1 2>&1`;
-	if ($? != 0) {
-		exit 0;
-	}
-}
-chomp $apache;
 my $stats;
-open STATUS, "$apache status 2>/dev/null|" or exit;
+open STATUS, "/usr/sbin/apache2ctl status 2>/dev/null|" or exit;
 while(<STATUS>) {
 	m/$regex/ or next;
 	chomp;

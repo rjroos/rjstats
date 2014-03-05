@@ -3,9 +3,9 @@ use strict;
 
 my ($la1,$la5,$la15);
 
-open LOAD, "uptime|" || die "Cannot open uptime.\n";
+open LOAD, "</proc/loadavg";
 while(<LOAD>) {
-   /: (\S+),\s(\S+),\s(\S+)/ and do {
+   /(\S+)\s(\S+)\s(\S+)/ and do {
       ($la1,$la5,$la15) = ($1,$2,$3);
       last;
    }

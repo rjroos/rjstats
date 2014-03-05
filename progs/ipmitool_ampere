@@ -1,0 +1,15 @@
+#!/bin/sh
+
+(ipmitool sensor reading 'Current 1' 2>/dev/null ; ipmitool sensor reading 'Current 2' 2>/dev/null) | grep ^Current | cut -f1,2 -d\| |\
+		 while read sensor number amps ; do
+	name=`echo $sensor $number | sed -e 's/[ /]/-/g'`
+	amps=`echo $amps | sed -e 's/[\| ]//g'`;
+	cat << EOF
+ipmitool.$name.graph.title = Current for $sensor
+ipmitool.$name.graph.unit  = Amps
+ipmitool.$name.line.in.value = $amps
+ipmitool.$name.line.in.type  = GAUGE
+EOF
+done
+
+

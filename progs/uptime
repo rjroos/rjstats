@@ -6,7 +6,7 @@ my $daysup = 0;
 
 open UP, "uptime|";
 while(<UP>) {
-   /(\d+)\s*day/ and do {
+   /(\d+)\s*days/ and do {
 	   $daysup = $1;
    }
 }

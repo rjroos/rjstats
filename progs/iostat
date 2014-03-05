@@ -3,50 +3,28 @@ use strict;
 
 my ($reads, $writes);
 
-my $data = {};
-
-my $os = `uname`;
-if ($os =~ m/FreeBSD/) {
-		my @tmp = `/usr/sbin/iostat -dK`;
-		my @ifs = split /\s+/, "$tmp[0]";
-		my @data = split /\s+/, "$tmp[2]";
-		for (my $i = 1 ; $i < scalar(@ifs) ; $i++) {
-			my $if_tmp = $ifs[$i];
-			my $tps = $data[3*$i - 1];
-			my $kpt = $data[3*$i - 2];
-			$data->{$if_tmp}->{reads} = int($tps * $kpt);
-			$data->{$if_tmp}->{writes} = 0;
-		}
-} else {
-		open IOSTAT, "/proc/diskstats" || die "/proc/diskstats: $!\n";
-		while(<IOSTAT>) {
-			chomp;
-			my $do = 0;
-			my @arr = split /\s+/;
-			#print "@arr\n";
-			#print scalar @arr, "\n";
-			if (scalar(@arr) == 15) {
-				my $dev = $arr[3];
-				splice(@arr, 0, 4);
-				my $sum = 0;
-				map  { $sum += $_ } @arr; 
-				next unless ($sum > 0);
-				$data->{$dev}->{reads} = $arr[4] * 512;
-				$data->{$dev}->{writes} = $arr[5] * 512;
-			}
-		}
-		close IOSTAT;
+open IOSTAT, "iostat|";
+while(<IOSTAT>) {
+   my @arr = split /\s+/;
+   if (scalar @arr == 6) {
+      $reads  = $arr[4] ;
+      $writes = $arr[5] ;
+   }
 }
+close IOSTAT;
 
-for my $if ( keys %{$data} ) {
-	my $reads = $data->{$if}->{reads};
-	my $writes = $data->{$if}->{writes};
+$reads =~ m/^\d+$/ or exit 0;
 
-	print "system.iostat_$if.graph.title=Disk I/O\n";
-	print "system.iostat_$if.graph.unit=bytes/sec\n";
-	print "system.iostat_$if.line.reads.value=$reads\n";
-	print "system.iostat_$if.line.reads.type=COUNTER\n";
-	print "system.iostat_$if.line.reads.linetype=AREA\n";
-	print "system.iostat_$if.line.writes.value=$writes\n";
-	print "system.iostat_$if.line.writes.type=COUNTER\n";
-}
+# 1 block = 512 bytes with 2.4 kernels.
+$reads *= 512;
+$writes *= 512;
+
+print "system.iostat.graph.title=Disk I/O\n";
+print "system.iostat.graph.unit=bytes/sec\n";
+print "system.iostat.line.reads.value=$reads\n";
+print "system.iostat.line.reads.type=COUNTER\n";
+print "system.iostat.line.reads.linetype=AREA\n";
+print "system.iostat.line.writes.value=$writes\n";
+print "system.iostat.line.writes.type=COUNTER\n";
+
+

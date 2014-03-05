@@ -3,12 +3,7 @@ use strict;
 
 my $tmp ;
 
-my $os = `uname`;
-if ($os =~ m/FreeBSD/) {
-	open FREE, "/compat/linux/proc/meminfo" || die "$!\n";
-} else {
-	open FREE, "free -b|" || die "$!\n";
-}
+open FREE, "free -b|";
 while(<FREE>) {
    my @arr = split /\s+/;
    if(scalar @arr == 7 && $arr[0] =~ /mem/i ) {
@@ -20,7 +15,7 @@ while(<FREE>) {
       $tmp->{used} -= $tmp->{buffers};
       $tmp->{used} -= $tmp->{cached};
    } else {
-      if ( $arr[0] =~ /swap:/i ) {
+      if ( $arr[0] =~ /swap/i ) {
          $tmp->{swap}     = $arr[2];
 		 $tmp->{freeswap} = $arr[3];
       }

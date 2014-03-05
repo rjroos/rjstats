@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+# vim: tw=80
+#
+# $Id$
+#
+# Parse en print /proc/self/nfsstats
+
+use warnings;
+use strict;
+
+# print alleen dingen die in mount staan. Sun ZFS filers stoppen in mountstats
+# ook alle subdirectories met dezelfde getallen.
+my @printmounts = `mount | grep nfs | cut -f1 -d' '`;
+
+my $nfs;
+my $inOps;
+my $printMe;
+open MOUNTSTATS, "/proc/self/mountstats";
+while (<MOUNTSTATS>) {
+	next if m/^$/;
+	m/^device ([^ ]+) / and do {
+		my $dev = $1;
+		if (m/with fstype nfs/) {
+			$nfs = $dev;
+			$printMe = grep { chomp ; $_ eq $nfs } @printmounts; 
+		} else {
+			$nfs = undef;
+			$printMe = 0;
+		}
+		$inOps = undef;
+		next;
+	};
+
+	next unless defined($nfs) && $printMe;
+
+	$nfs =~ s#[:/\.]#_#g;
+	$nfs =~ s#_{2,}#_#g;
+
+	m/^\s*bytes:/ and do {
+		my ($_ignore, $normalreadbytes, $normalwritebytes, $directreadbytes,
+				$directwritebytes, $serverreadbytes, $serverwritebytes, $crap) = split;
+
+		if ($printMe) {
+			print "nfsstats.$nfs" . "_normal.graph.title = read(2)/write(2)\n";
+			print "nfsstats.$nfs" . "_normal.line.reads.value = $normalreadbytes\n";
+			print "nfsstats.$nfs" . "_normal.line.reads.type  = COUNTER\n";
+			print "nfsstats.$nfs" . "_normal.line.writes.value = $normalwritebytes\n";
+			print "nfsstats.$nfs" . "_normal.line.writes.type  = COUNTER\n";
+
+			print "nfsstats.$nfs" . "_odirect.graph.title = O_DIRECT\n";
+			print "nfsstats.$nfs" . "_odirect.line.reads.value = $directreadbytes\n";
+			print "nfsstats.$nfs" . "_odirect.line.reads.type  = COUNTER\n";
+			print "nfsstats.$nfs" . "_odirect.line.writes.value = $directwritebytes\n";
+			print "nfsstats.$nfs" . "_odirect.line.writes.type  = COUNTER\n";
+
+			print "nfsstats.$nfs" . "_server.graph.title = NFS READ/NFS WRITE\n";
+			print "nfsstats.$nfs" . "_server.line.reads.value = $serverreadbytes\n";
+			print "nfsstats.$nfs" . "_server.line.reads.type  = COUNTER\n";
+			print "nfsstats.$nfs" . "_server.line.writes.value = $serverwritebytes\n";
+			print "nfsstats.$nfs" . "_server.line.writes.type  = COUNTER\n";
+		}
+	};
+
+	m/per-op statistics/ and do {
+		$inOps = 1;	
+		next;
+	};
+
+	if (defined($inOps)) {
+		my ($_ignore, $opname, $value, $_ignore2) = split /\s+/;
+		$opname =~ s/[ :]//;
+		if ($printMe) {
+			print "nfsstats.$nfs" . "_ops_$opname.graph.title = NFS $opname\n";
+			print "nfsstats.$nfs" . "_ops_$opname.line.value.value = $value\n";
+			print "nfsstats.$nfs" . "_ops_$opname.line.value.type  = COUNTER\n";
+		}
+	}
+}
+close MOUNTSTATS;

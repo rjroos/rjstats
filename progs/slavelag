@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if ! pgrep -x mysqld > /dev/null ; then
+	exit
+fi
+
+DATADIR=`ps ax | grep -c /data/mysql/data`
+
+if ! test "$DATADIR" -gt "1"; then
+    exit
+fi
+
+# als we outfilerestore draaien kunnen we ook niet inloggen.
+if ! test -z "`ps ax | grep 'mysqld --skip-grant-table' | grep -v grep`"; then
+	exit
+fi
+
+DELAY=`echo 'SHOW SLAVE STATUS\G' | mysql -h localhost | grep Seconds_Behind_Master | cut -f2 -d: | tr -d ' '`
+
+echo "services.mysql-slavelag.graph.title=Mysql Slave lag"
+echo "services.mysql-slavelag.line.count.value=$DELAY"
+echo "services.mysql-slavelag.line.count.type=GAUGE"
+
+
+rm -f $TEMPFILE
+exit $EXIT

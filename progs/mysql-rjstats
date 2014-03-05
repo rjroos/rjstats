@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if ! pgrep -x mysqld > /dev/null ; then
+	exit
+fi
+
+echo "SHOW GLOBAL STATUS" | mysql -hlocalhost --skip-column-names |\
+	while read KEY VAL ; do
+
+                # controller of $VAL een integer is.
+                if ! test "$VAL" -gt -1 1>/dev/null 2>&1; then
+                        continue
+                fi
+
+		if ! test -z "${VAL//[a-z]}"; then
+			echo "mysql.$KEY.graph.title=$KEY"
+			echo "mysql.$KEY.line.value.value=$VAL"
+			echo "mysql.$KEY.line.value.type=GAUGE"
+			echo "mysql.${KEY}_counter.graph.title=$KEY"
+			echo "mysql.${KEY}_counter.line.value.value=$VAL"
+			echo "mysql.${KEY}_counter.line.value.type=COUNTER"
+		fi
+	done

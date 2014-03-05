@@ -5,13 +5,7 @@ use warnings;
 my $cpus ;
 
 my @arr;
-
-my $os = `uname`;
-if ($os =~ m/FreeBSD/) {
-	open STAT, "/compat/linux/proc/stat";
-} else {
-	open STAT, "/proc/stat";
-}
+open STAT, "/proc/stat";
 while(<STAT>) {
    /^cpu(\d+|)/ or next;
    my $cpu = "cpu$1";
@@ -20,6 +14,7 @@ while(<STAT>) {
    $cpus->{$cpu}->{nice}   = $arr[2];
    $cpus->{$cpu}->{system} = $arr[3];
    $cpus->{$cpu}->{idle}   = $arr[4];
+   $cpus->{$cpu}->{iowait} = $arr[5];
 }
 close STAT;
 
@@ -32,7 +27,7 @@ foreach my $cpu (keys %{$cpus}) {
 	if($cpu eq 'cpu') {
 		$max = 100 * (scalar(keys(%{$cpus})) - 1);
 	}
-	for(qw/system user nice idle/) {
+	for(qw/system user nice iowait idle/) {
 		my $val = $cpus->{$cpu}->{$_};
 		print "system.$cpu.line.$_.value=$val\n";
 		print "system.$cpu.line.$_.type=COUNTER\n";

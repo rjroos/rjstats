@@ -4,35 +4,23 @@ use strict;
 my $data;
 my $tmp;
 
-my $os = `uname`;
-if ($os =~ m/FreeBSD/) {
-	open NETSTAT, "/usr/bin/netstat -f link -bi|sed 's/*/ /'|";
-	while (<NETSTAT>) {
-		/^Name/	and next;
-		my @tmp = split('\s+');
-		$data->{$tmp[0]}->{in} = $tmp[6] * 8;
-		$data->{$tmp[0]}->{out} = $tmp[7] * 8;
-	}
-	close NETSTAT;
-} else {
-	open IFCONFIG, "/sbin/ifconfig -v|";
-	while(<IFCONFIG>) {
-		/^([^\s]+)\s/ and $tmp = $1;
-		/RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1 * 8;
-  		/TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1 * 8;
-	}
-	close IFCONFIG;
+open IFCONFIG, "/sbin/ifconfig -v|";
+while(<IFCONFIG>) {
+   /^([^\s]+)\s/ and $tmp = $1;
+   /RX bytes:(\d+)/ and $data->{$tmp}->{in} = $1;
+   /TX bytes:(\d+)/ and $data->{$tmp}->{out} = $1;
 }
+close IFCONFIG;
 
 foreach my $if ( keys %{ $data } ) {
    my $in  = $data->{$if}->{in} ;
    my $out = $data->{$if}->{out} ;
-   print "traffic.$if.graph.title = Bandwith usage for $if\n";
-   print "traffic.$if.graph.unit  = bits / second\n";
-   print "traffic.$if.line.in.label = Incoming\n";
-   print "traffic.$if.line.in.type  = COUNTER\n";
-   print "traffic.$if.line.in.value = $in\n";
-   print "traffic.$if.line.out.label = Outgoing\n";
-   print "traffic.$if.line.out.type  = COUNTER\n";
-   print "traffic.$if.line.out.value = $out\n";
+   print "bandwidth.$if.graph.title = Bandwith usage for $if\n";
+   print "bandwidth.$if.graph.unit  = Bytes/second\n";
+   print "bandwidth.$if.line.in.label = Incoming bytes per second\n";
+   print "bandwidth.$if.line.in.type  = COUNTER\n";
+   print "bandwidth.$if.line.in.value = $in\n";
+   print "bandwidth.$if.line.out.label = Outgoing bytes per second\n";
+   print "bandwidth.$if.line.out.type  = COUNTER\n";
+   print "bandwidth.$if.line.out.value = $out\n";
 }

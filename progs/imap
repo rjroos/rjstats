@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if test -z "`pgrep imapd`" -a -z "`pgrep perdition.imap4`" -a -z "`pgrep dovecot`"; then
+	exit 0
+fi
+
+if test ! -z "`pgrep dovecot`"; then
+    LOGINS=`grep "imap-login: Login:" /var/log/mail.log | wc -l`
+    LOGINS_FAILED=`grep "imap-login: Aborted login" /var/log/mail.log | wc -l`
+else
+    LOGINS=`grep "couriertcpd: LOGIN" /var/log/mail.log | wc -l`
+    LOGINS_FAILED=`grep "couriertcpd: LOGIN FAILED" /var/log/mail.log | wc -l`
+fi
+
+echo "email.imap-logins.graph.title=Imap logins"
+echo "email.imap-logins.line.count.value=$LOGINS"
+echo "email.imap-logins.line.count.type=COUNTER"
+echo "email.imap-logins.line.failcnt.value=$LOGINS_FAILED"
+echo "email.imap-logins.line.failcnt.type=COUNTER"
+
+
+CONNECTIONS_ESTABLISHED=`netstat -an | grep :143 | grep ESTABLISHED | wc -l`
+CONNECTIONS_TIMEWAIT=`netstat -an | grep :143 | grep TIME_WAIT | wc -l`
+echo "email.imap-connections.graph.title=IMAP connections"
+echo "email.imap-connections.line.established.value=$CONNECTIONS_ESTABLISHED"
+echo "email.imap-connections.line.established.type=GAUGE"
+echo "email.imap-connections.line.timewait.value=$CONNECTIONS_TIMEWAIT"
+echo "email.imap-connections.line.timewait.type=GAUGE"
+

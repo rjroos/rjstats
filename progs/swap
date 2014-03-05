@@ -1,0 +1,13 @@
+#!/bin/sh
+
+IN=`vmstat -s | grep 'pages swapped in' | tr -s ' ' | cut -f2 -d' '`
+OUT=`vmstat -s | grep 'pages swapped out' | tr -s ' ' | cut -f2 -d' '`
+
+cat << EOF
+system.swap.graph.title=Swap
+system.swap.graph.unit=nr. of pages
+system.swap.line.swapin.value=$IN
+system.swap.line.swapin.type=COUNTER
+system.swap.line.swapout.value=$OUT
+system.swap.line.swapout.type=COUNTER
+EOF

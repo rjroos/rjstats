@@ -2,8 +2,8 @@
 use warnings;
 use strict;
 
-if (! -f "/proc/diskstats" && ! -f "/proc/partitions") {
-	exit(0);
+if (!-f "/proc/diskstats") {
+	return;
 }
 
 sub writeDevice {
@@ -49,39 +49,17 @@ sub writePartition {
 my $parts;
 my $devs;
 
-if (-f "/proc/diskstats") { # linux 2.6
-	open P, "/proc/diskstats" || die "/proc/diskstats: $!\n";
-	while (<P>) {
-		chomp;
-		s/^\s*//;
-		my @arr = split m/\s+/;
-		if (scalar @arr == 14) {
-			writeDevice(@arr);
-		} elsif (@arr == 7) {
-			writePartition(@arr);
-		} else {
-			print scalar @arr, "\n";
-		}
+open P, "/proc/diskstats" || die "/proc/diskstats: $!\n";
+while (<P>) {
+	chomp;
+	s/^\s*//;
+	my @arr = split m/\s+/;
+	if (scalar @arr == 14) {
+		writeDevice(@arr);
+	} elsif (@arr == 7) {
+		writePartition(@arr);
+	} else {
+		print scalar @arr, "\n";
 	}
-	close P;
-} elsif (-f "/proc/partitions") { # linux 2.4
-	# this does not work.
-	# Who is running 2.4 anyway these days.
-	# 
-	# open P, "/proc/partitions" || die "/proc/partitions: $!\n";
-	# while (<P>) {
-	# 	chomp;
-	# 	s/^\s*//;
-	# 	my @arr = split m/\s+/;
-	# 	my $iCount = scalar @arr;
-	# 	if ($iCount == 15) {
-	# 		writeDevice(@arr);
-	# 	} elsif ($iCount == 7) {
-	# 		writePartition(@arr);
-	# 	} else {
-	# 		print scalar @arr, "\n";
-	# 	}
-	# }
-	# close P;
 }
 close P;

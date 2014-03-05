@@ -1,0 +1,9 @@
+#!/bin/sh
+
+COUNT=`netstat -an | grep :143 | grep ESTABLISHED | wc -l`
+
+echo "imap.active-connections.graph.title=Active IMAP connections"
+
+echo "imap.active-connections.line.count.value=$COUNT"
+echo "imap.active-connections.line.count.type=GAUGE"
+echo "imap.active-connections.line.count.max=400"
