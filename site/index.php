@@ -1,5 +1,5 @@
 <?
-/* $Id: index.php,v 1.11 2010/02/12 15:31:53 rjroos Exp $ */
+/* $Id: index.php,v 1.8 2009/04/09 10:37:56 rjroos Exp $ */
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
@@ -185,12 +185,20 @@ foreach($arr as $file) {
 }
 $computers = array_unique($computers);
 $services  = array_unique($services);
+
+function getNiceHost($host) {
+	if (strstr($host, "_via_")) {
+		return $host;
+	}
+	return gethostbyaddr($host);
+}
+
 function sort_hostname($a, $b) {
 	if ($a == $b) {
 		return 0;
 	}
-	$stra = gethostbyaddr($a);
-	$strb = gethostbyaddr($b);
+	$stra = getNiceHost($a);
+	$strb = getNiceHost($b);
 	return strnatcmp($stra, $strb);
 }
 usort($computers, "sort_hostname");
@@ -203,25 +211,15 @@ sort($servicegroups);
 
 <head>
 <title>RJStats graphs.</title>
-<style type='text/css'>
-select {
-	height:300px;
-}
-li {
-	list-style:none;
-}
-ul {
-	padding-left:0px;
-}
-tr {
-	vertical-align:top;
-}
-td {
-	border:1px solid #000;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://jackbliss.co.uk/projects/localstorage/min.jquery.saveit.js'></script>
+
 <script type='text/javascript'>
-window.onload = function() {updateServices()}
+$(document).ready(function() {
+	updateServices();
+	$('#savedsearches').loadit({def : 'Geen.'});
+});
 
 function showService(aGroupsSelected, sService) {
 	if (aGroupsSelected.length == 0) {
@@ -261,16 +259,43 @@ function toggleFormMethod() {
 	f.method = "POST";
 	return true;
 }
+
+function saveSearch() {
+	var s = prompt("Name?");
+	$('#savedsearches').append(
+			"<li>" +
+			"<a href='" + document.location + "'>" + s + "</a>" +
+			"&nbsp;&nbsp;&nbsp;" +
+			"<a class='small' href='#' onclick='removeSearch(this); return false;'>remove</a>" +
+			"</li>")
+	$('#savedsearches').saveit();
+}
+
+function clearAllSaved() {
+	if (!confirm("Clear all?")) {
+		return;
+	}
+	$('#savedsearches').html('');
+	$('#savedsearches').saveit();
+}
+
+function removeSearch(obj) {
+	$(obj.parentNode).remove();
+	$('#savedsearches').saveit();
+}
 </script>
 </head>
 
 <body>
-<hr>
-<p>
-<a href="?allcomputers=1&amp;services[]=system/cpu&amp;timespan=<?= 3600 * 24 * 2 ?>">All CPU</a>
-<a href="?allcomputers=1&amp;services[]=system/memory&amp;timespan=<?= 3600 * 24 * 2 ?>">All MEM</a>
-<a href="mysqlservers/">MySql Activity Reports Kantoor</a>
-<a href="userdir/">Userdir stats</a>
+
+<div class='savedsearchbox'>
+<div class="header">Saved searches (localStorage! not permanent).
+<a href="#" onclick="saveSearch(); return false;">Save this search</a>
+<a class="small" href="#" onclick="clearAllSaved(); return false;">Clear</a>
+</div>
+<ul id="savedsearches">
+</ul>
+</div>
 
 <form method='get' action='<?= $_SERVER["PHP_SELF"] ?>' name='form'>
 
@@ -280,7 +305,7 @@ function toggleFormMethod() {
 			<select name="computers[]" multiple>
 			<? foreach($computers as $pc) {
 				$selected = '';
-				$nice = gethostbyaddr($pc);
+				$nice = getNiceHost($pc);
 				$pcs = @$_REQUEST['computers'];
 				$all = @$_REQUEST['allcomputers'];
 				if ($all || (isset($pcs) && in_array($pc, $pcs))) {
@@ -362,7 +387,6 @@ function radio($var, $lbl) {
 </table>
 </form>
 
-<hr>
 <?
 function doComputer($computer) {
 	$timespan = $_REQUEST['timespan'] or 3600*24*31;
@@ -376,8 +400,8 @@ function doComputer($computer) {
 	foreach($_REQUEST['services'] as $service) {
 		$f = RJSTATS_DATA."/".$computer."/php/"."/$service.php";
 		if(file_exists($f)) {
-			echo("<h4>" .gethostbyaddr($computer)." - $service</h4>\n");
-			echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".gethostbyaddr($computer)." - $service' /><br/>\n");
+			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
+			echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".getNiceHost($computer)." - $service' /><br/>\n");
 		}
 	}
 }
@@ -396,7 +420,6 @@ if(isset($_REQUEST['timespan'])) {
 	}
 }
 ?>
-<hr>
 <p>
 <a href='http://rjstats.sourceforge.net/' target='rjstats.sf.net'>rjstats</a> - UNIX monitoring
 <p>

@@ -1,0 +1,32 @@
+* {
+	font-family:sans-serif;
+}
+select {
+	height:300px;
+	min-width:150px;
+}
+li {
+	list-style:none;
+}
+ul {
+	padding-left:0px;
+}
+tr {
+	vertical-align:top;
+}
+td {
+	border:1px solid #000;
+}
+.small {
+	font-size:70%;
+}
+
+div.savedsearchbox {
+	background-color:#ddd;
+	margin-bottom:20px;
+	padding:4px;
+}
+div.savedsearchbox li {
+	list-style-type:circle;
+	margin-left:30px;
+}
