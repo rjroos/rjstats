@@ -100,10 +100,6 @@ class Find {
 			die("Cannot open $dir");
 		}
 
-		if ( substr($dir,-1) == "/" ) {
-			$dir = substr($dir, 1, -1);
-		}
-
 		/* Set files in an array to limit open file/dir handles */
 		$files = array();
 		while ($file = readdir($dh)) {
