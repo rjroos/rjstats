@@ -11,14 +11,14 @@ parser = re.compile("ds\[(.*?)\]\.(.*?)=(.*)")
 
 datasources = {}
 
-# TODO: haal data dir hack weg, dit pad moet uit install komen
-defBase = "DEF:%s=/var/rrdstats/%s/%s.rrd:%s:AVERAGE"
+
+datadir = sys.argv[1]
+machine = sys.argv[2]
+stat = sys.argv[3]
+
+defBase = "DEF:%s=" +  datadir + "/%s/%s.rrd:%s:AVERAGE"
 xportBase = "XPORT:%s:%s"
-
-
-machine = sys.argv[1]
-stat = sys.argv[2]
-rrdFile = "/var/rrdstats/" + machine + "/" + stat + ".rrd"
+rrdFile = datadir + "/" + machine + "/" + stat + ".rrd"
 
 def parseIt():
 	p =subprocess.Popen(["rrdtool", "info", rrdFile], stdout=subprocess.PIPE)	

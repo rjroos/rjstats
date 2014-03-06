@@ -9,7 +9,7 @@ $command[] = 'xport';
 $command[] = '--json';
 $command[] = '--start '.$start;
 $parsedRrdDefs = array();
-exec("/var/rrdstats/json/parserrddefs.py $computer $service", $parsedRrdDefs);
+exec(__DIR__ . "/parserrddefs.py " . RJSTATS_DATA . " $computer $service", $parsedRrdDefs);
 $command[] = join(' ', $parsedRrdDefs);
 $command[] = '2>&1';
 $cmd = join(' ', $command);
