@@ -3,6 +3,13 @@
 error_reporting(E_ALL);
 require("rjstats.conf.inc");
 
+function param($name, $def) {
+	if (isset($_REQUEST[$name])) {
+		return $_REQUEST[$name];
+	}
+	return $def;
+}
+
 class Find {
 	var $_dir;                     // dir to search.
 	var $_recursive     = true;    // find recursively
@@ -280,8 +287,8 @@ function updateServices() {
 function getCharts() {
 	<?php
 		$timespan = $_REQUEST['timespan'];
-		foreach ($_REQUEST['computers'] as $comp) {
-			foreach ($_REQUEST['services'] as $serv) { 
+		foreach (param("computers", array()) as $comp) {
+			foreach (param("services", array()) as $serv) {
 				echo "fetchChart('$comp', '$serv', $timespan);";
 			}
 		}
@@ -342,8 +349,7 @@ function removeSearch(obj) {
 				$selected = '';
 				$nice = getNiceHost($pc);
 				$pcs = @$_REQUEST['computers'];
-				$all = @$_REQUEST['allcomputers'];
-				if ($all || (isset($pcs) && in_array($pc, $pcs))) {
+				if (isset($pcs) && in_array($pc, $pcs)) {
 					$selected = " selected";
 				}
 			?>
@@ -436,7 +442,7 @@ function doComputer($computer) {
 		$timespan = -$timespan * $timerepeat;
 	}
 	$start = time() - $timespan;
-	foreach($_REQUEST['services'] as $service) {
+	foreach(param("services", array()) as $service) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
 		if(file_exists($f)) {
 			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
@@ -447,16 +453,8 @@ function doComputer($computer) {
 }
 
 if(isset($_REQUEST['timespan'])) {
-	if(isset($_REQUEST["allcomputers"])) {
-		foreach($computers as $computer) {
-			doComputer($computer);
-		}
-	} else {
-		if (isset($_REQUEST['computers'])) {
-			foreach($_REQUEST['computers'] as $computer) {
-				doComputer($computer);
-			}
-		}
+	foreach (param("computers", array()) as $computer) {
+		doComputer($computer);
 	}
 }
 ?>
