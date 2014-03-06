@@ -150,7 +150,7 @@ $computers = array();
 $services  = array();
 $servicegroups = array();
 foreach($arr as $file) {
-	$tmp = split("/", $file);
+	$tmp = explode("/", $file);
 	$iSize = sizeof($tmp);
 	$computers[] = $tmp[$iSize - 3];
 	$group = $tmp[$iSize - 2];
