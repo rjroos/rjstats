@@ -427,6 +427,31 @@ function radio($var, $lbl) {
 			<input type='submit' value="GET" />
 			<input type='submit' value="POST" onclick="toggleFormMethod()" />
 		</td>
+		<td>   
+			<h3>Options</h3>
+			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if ($_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
+			<br />
+			<label for="stacking">Graph stacking</label>
+			<?php
+				function echoSelect($selectName, $aOpts) {
+					echo "<select id='$selectName' name='$selectName'>";
+					foreach($aOpts as $index => $value) {
+						$selected = '';
+						if($_REQUEST[$selectName] == $index) {
+							$selected = 'selected';
+						}
+						echo "<option value='$index' $selected>$value</option>";
+					}
+					echo "</select>";
+				}
+				$stackingOpts = array(
+					"" => "no stacking",
+					"normal" => "normal",
+					"percent" => "percent"
+				);
+				echoSelect("stacking", $stackingOpts);
+			?>
+		</td>
 	</tr>
 </table>
 </form>
@@ -446,8 +471,12 @@ function doComputer($computer) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
 		if(file_exists($f)) {
 			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
-			# we willen een default hashing-achtige truuk zodat alle host/service combo's een id hebben zonder / en andere grappen erin
-			echo("<div id='".base64_encode($computer.$service)."'></div>");
+                        if ($_REQUEST['oldstyle'] == "on") {
+                                echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".getNiceHost($computer)." - $service' /><br/>\n");
+                        } else {
+				# we willen een default hashing-achtige truuk zodat alle host/service combo's een id hebben zonder / en andere grappen erin
+                                echo("<div id='".base64_encode($computer.$service)."' class='rjchart'></div>");
+                        }
 		}
 	}
 }

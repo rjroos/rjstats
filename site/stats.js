@@ -34,6 +34,7 @@ function getVector(data, index) {
 
 
 function showChart(aSeries, interval, service, container, delta) {
+	var stacking = jQuery("#stacking").val();
 	$('#'+container).highcharts({
 	chart: {
 		type: 'area',
@@ -63,7 +64,7 @@ function showChart(aSeries, interval, service, container, delta) {
 	plotOptions: {
 		pointInterval: interval,
 		area: {
-			stacking: 'normal',
+			stacking: stacking,
 			marker: {
 				enabled: false,
 				symbol: 'circle',
