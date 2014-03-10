@@ -63,6 +63,7 @@ function showChart(aSeries, interval, service, container, delta) {
 	plotOptions: {
 		pointInterval: interval,
 		area: {
+			stacking: 'normal',
 			marker: {
 				enabled: false,
 				symbol: 'circle',
