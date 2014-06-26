@@ -1,17 +1,8 @@
-
-
-// Dit moet omdat rrdtool geen geldige JSON uitkakt, anders konden we gewoon jQuery.getJSON() kunnen gebruiken, maar helaas.
-// TODO: haal dit weg als rrdtool gefixed wordt.
-function hackEval(sData) {
-	return eval("(" + sData + ")");
-}
-
 function fetchChart(computer, service, delta) {
 	var container = btoa(computer+service).split("=").join("\\=");
 	var url = "jsonview.php?computer="+ computer +"&timedelta="+delta+"&service="+service;
 	var h = jQuery.get(url);
-	h.done(function(ret) { 
-		var ldata = (hackEval(ret));
+	h.done(function(ldata) { 
 		var legend = ldata.meta.legend;
 		var series = [];
 		legend.map(function(l){
