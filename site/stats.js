@@ -18,6 +18,7 @@ function fetchChart(computer, service, starttime) {
 			var els = getVector(result.data, index);
 			return {
 				name : l,
+				index: legend.length - 1 - index,
 				pointInterval : result.meta.step * 1000,
 				data : els,
 				pointStart: starttime * 1000
@@ -51,6 +52,9 @@ function showChart(aSeries, interval, service, $container, starttime) {
 			plotshadow: true,
 			height: 300,
 			spacingRight: 0
+		},
+		legend: {
+			reversed : true
 		},
 		title: {
 			text: service
