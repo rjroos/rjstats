@@ -265,19 +265,15 @@ function radio($var, $lbl) {
 				<li><?= radio(-3600, "Last hours") ?></li>
 				<li><?= radio(-3600*24, "Last days") ?></li>
 				<li><?= radio(-3600*24*7, "Last weeks") ?></li>
-				<? $timerepeat = (isset($_REQUEST['timerepeat'])
-									? $_REQUEST['timerepeat']
-									: 1);
-				?>
-				<input type='text' name='timerepeat' value='<?=$timerepeat?>'
-						size='4' maxlength='3'/>
+				<? $timerepeat = param("timerepeat", 1); ?>
+				<input type='text' name='timerepeat' value='<?=$timerepeat?>' size='4' maxlength='3'/>
 			</ul>
 			<input type='submit' value="GET" />
 			<input type='submit' value="POST" onclick="toggleFormMethod()" />
 		</td>
 		<td>   
 			<h3>Options</h3>
-			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if ($_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
+			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if (@$_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
 			<br />
 			<label for="stacking">Graph stacking</label>
 			<?php
@@ -319,7 +315,7 @@ function doComputer($computer) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
 		if (file_exists($f)) {
 			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
-			if ($_REQUEST['oldstyle'] == "on") {
+			if (@$_REQUEST['oldstyle'] == "on") {
 				$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
 				echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
 			} else {
