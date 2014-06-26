@@ -6,11 +6,11 @@ import sys
 import subprocess
 
 #ds[tcp_listen].index = 1
-
 parser = re.compile("ds\[(.*?)\]\.(.*?)=(.*)")
 
-datasources = {}
-
+if len(sys.argv) != 4:
+	print "Usage: $0 <datadir> <ip> <group/service>"
+	sys.exit(1)
 
 datadir = sys.argv[1]
 machine = sys.argv[2]
@@ -23,6 +23,7 @@ rrdFile = datadir + "/" + machine + "/" + stat + ".rrd"
 def parseIt():
 	p =subprocess.Popen(["rrdtool", "info", rrdFile], stdout=subprocess.PIPE)	
 	out, err = p.communicate()
+	datasources = {}
 	for line in out.split("\n"):
 		m = parser.match(line)
 		if m:
@@ -39,9 +40,11 @@ def getXport(key):
 	return xportBase % (key, key)
 
 def outputJsonXporter():
-	parseIt()
+	datasources = parseIt()
+	print(datasources)
 	for key in datasources.keys():
 		print getDef(key)
 		print getXport(key)
+
 
 outputJsonXporter()
