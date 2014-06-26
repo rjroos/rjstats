@@ -3,8 +3,8 @@ require_once("rjstats.conf.inc");
 require_once("lib/Services_JSON.php");
 
 function error($str) {
-	die("" . $str);
-	exit(1);
+	echo json_encode(array("error" => $str));
+	exit();
 }
 
 function rj_exec($cmd) {

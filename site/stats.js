@@ -1,25 +1,30 @@
 function fetchChart(computer, service, delta) {
-	var container = btoa(computer+service).split("=").join("\\=");
+	var $container = $("#" + btoa(computer+service).split("=").join("\\="));
+	if ($container.length == 0) {
+		console.error("container not found: " + $container.selector);
+		return;
+	}
+
 	var url = "jsonview.php?computer="+ computer +"&timedelta="+delta+"&service="+service;
-	var h = jQuery.get(url);
-	h.done(function(ldata) { 
-		var legend = ldata.meta.legend;
-		var series = [];
-		legend.map(function(l){
+	jQuery.get(url, function(result) {
+		if (result.error) {
+			$err = $("<div style='color:red'/>").appendTo($container).text(result.error);
+			return;
+		}
+
+		var legend = result.meta.legend;
+		var series = legend.map(function(l) {
 			var index = legend.indexOf(l);
-			var els = getVector(ldata.data, index);
-			series.push({
+			var els = getVector(result.data, index);
+			return {
 				name : l,
-				pointInterval : ldata.meta.step * 1000,
+				pointInterval : result.meta.step * 1000,
 				data : els,
 				pointStart: Date.now() - delta*1000
-			});
+			};
 		});
-		showChart(series, ldata.meta.step, service, container, delta);
-	});
-	h.error(function(res) {
-		$("#" + container).val(res);
-	});
+		showChart(series, result.meta.step, service, $container, delta);
+	}, "json");
 }
 
 
@@ -32,9 +37,9 @@ function getVector(data, index) {
 }
 
 
-function showChart(aSeries, interval, service, container, delta) {
+function showChart(aSeries, interval, service, $container, delta) {
 	var stacking = jQuery("#stacking").val();
-	$('#'+container).highcharts({
+	$container.highcharts({
 		chart: {
 			type: 'area',
 			zoomType: 'xy',
