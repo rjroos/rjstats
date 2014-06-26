@@ -38,6 +38,11 @@ function getVector(data, index) {
 
 
 function showChart(aSeries, interval, service, $container, delta) {
+	Highcharts.setOptions({
+		global: {
+			useUTC: false
+		}
+	});
 	var stacking = jQuery("#stacking").val();
 	$container.highcharts({
 		chart: {
