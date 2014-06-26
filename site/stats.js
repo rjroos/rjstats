@@ -36,51 +36,51 @@ function getVector(data, index) {
 function showChart(aSeries, interval, service, container, delta) {
 	var stacking = jQuery("#stacking").val();
 	$('#'+container).highcharts({
-	chart: {
-		type: 'area',
-		zoomType: 'xy',
-		plotshadow: true,
-		height: 300
-	},
-	title: {
-		text: service
-	},
-	xAxis: {
-		tickInterval: interval * 1000,
-		type: 'datetime',
-		title: {
-			text: "date"
+		chart: {
+			type: 'area',
+			zoomType: 'xy',
+			plotshadow: true,
+			height: 300
 		},
-		labels: {
-			maxStaggerLines: 1
-		}
-	},
-	yAxis: {
-		allowDecimals : true,
 		title: {
 			text: service
 		},
-	},
-	plotOptions: {
-		pointInterval: interval,
-		area: {
-			stacking: stacking,
-			marker: {
-				enabled: false,
-				symbol: 'circle',
-				radius: 2,
-				states: {
-					hover: {
-						enabled: true
+		xAxis: {
+			tickInterval: interval * 1000,
+			type: 'datetime',
+			title: {
+				text: "date"
+			},
+			labels: {
+				maxStaggerLines: 1
+			}
+		},
+		yAxis: {
+			allowDecimals : true,
+			title: {
+				text: service
+			},
+		},
+		plotOptions: {
+			pointInterval: interval,
+			area: {
+				stacking: stacking,
+				marker: {
+					enabled: false,
+					symbol: 'circle',
+					radius: 2,
+					states: {
+						hover: {
+							enabled: true
+						}
 					}
 				}
 			}
-		}
-	},
-	tooltip: {
-		pointFormat: '{series.name}:<b>{point.y}</b>'
-	},
-	series: aSeries
+		},
+		tooltip: {
+			pointFormat: '{series.name}:<b>{point.y}</b>'
+		},
+		series: aSeries
 	});
 }
 
