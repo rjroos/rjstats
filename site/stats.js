@@ -24,7 +24,7 @@ function fetchChart(computer, service, starttime) {
 				pointStart: starttime * 1000
 			};
 		});
-		showChart(series, result.meta.step, service, $container, starttime);
+		showChart(series, result.meta.step, service, $container, starttime, result.meta.stacked);
 	}, "json");
 }
 
@@ -38,7 +38,7 @@ function getVector(data, index) {
 }
 
 
-function showChart(aSeries, interval, service, $container, starttime) {
+function showChart(aSeries, interval, service, $container, starttime, stacking) {
 	Highcharts.setOptions({
 		global: {
 			useUTC: false
@@ -48,7 +48,6 @@ function showChart(aSeries, interval, service, $container, starttime) {
 			thousandsSep: '.'
 		}
 	});
-	var stacking = jQuery("#stacking").val();
 	$container.highcharts({
 		chart: {
 			type: 'area',

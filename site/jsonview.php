@@ -41,6 +41,28 @@ function getXportDefs($rrdfile) {
 	return implode(" ", $rrdtoolXportDefs);
 }
 
+function isStackedGraph($rrdfile) {
+	# Naast de .rrd worden er door de rjstats-ontvanger daemons ook .php files
+	# geschreven met het commando om 1 plaatje te doen.
+	# In die .php staan zaken als welke kleur, welk lijntype, max en min, etc
+	# die je niet met rrdtool info uit de grafiek kan halen.
+	# De kleuren boeien niet zo momenteel, en met deze uberhack weten we of de
+	# grafiek zou moeten stacken of niet.
+	#
+	# Een toffe oplossing zou zijn die metadata in een .dbm bestand (of iets in
+	# die geest) te zetten zodat het uit te lezen is. Maar dat moet dan wel in de
+	# java daemon en de perl daemon gebeuren.
+
+	$parts = explode("/", $rrdfile);
+	$path = array_slice($parts, 0, 4);
+	$path[] = "php";
+	$path = array_merge($path, array_slice($parts, 4));
+	$phpFile = str_replace(".rrd", ".php", implode("/", $path));
+	if (! file_exists($phpFile)) {
+		error("File does not exist: $phpFile");
+	}
+	return strpos(file_get_contents($phpFile), "'STACK:") !== FALSE;
+}
 
 $start = $_REQUEST["start"];
 $service  = @$_REQUEST['service'];
@@ -66,6 +88,7 @@ $output = rj_exec(implode(" ", $command));
 
 $json = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
 $obj = $json->decode(implode(" ", $output));
+$obj['meta']['stacked'] = isStackedGraph($rrdfile);
 
 header('Content-type: application/json');
 echo json_encode($obj);

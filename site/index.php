@@ -284,27 +284,6 @@ function radio($var, $lbl) {
 		<td>   
 			<h3>Options</h3>
 			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if (@$_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
-			<br />
-			<label for="stacking">Graph stacking</label>
-			<?php
-				function echoSelect($selectName, $aOpts) {
-					echo "<select id='$selectName' name='$selectName'>";
-					foreach($aOpts as $index => $value) {
-						$selected = '';
-						if($_REQUEST[$selectName] == $index) {
-							$selected = 'selected';
-						}
-						echo "<option value='$index' $selected>$value</option>";
-					}
-					echo "</select>";
-				}
-				$stackingOpts = array(
-					"" => "no stacking",
-					"normal" => "normal",
-					"percent" => "percent"
-				);
-				echoSelect("stacking", $stackingOpts);
-			?>
 		</td>
 	</tr>
 </table>
