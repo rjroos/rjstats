@@ -8,26 +8,34 @@ function hackEval(sData) {
 
 function fetchChart(computer, service, delta) {
 	var container = btoa(computer+service).split("=").join("\\=");
-	var h = jQuery.get("jsonview.php?computer="+ computer +"&timedelta="+delta+"&service="+service,
-			function(ret) { 
-				ldata = (hackEval(ret));
-				var legend = ldata.meta.legend;
-				series = [];
-				legend.map(function(l){
-					var index = legend.indexOf(l);
-					var els = getVector(ldata.data, index);
-					series.push({ name : l, pointInterval : ldata.meta.step * 1000,  data : els, pointStart: Date.now() - delta*1000});
-				});
-				showChart(series, ldata.meta.step, service, container, delta);
-			}
-	);
+	var url = "jsonview.php?computer="+ computer +"&timedelta="+delta+"&service="+service;
+	var h = jQuery.get(url);
+	h.done(function(ret) { 
+		var ldata = (hackEval(ret));
+		var legend = ldata.meta.legend;
+		var series = [];
+		legend.map(function(l){
+			var index = legend.indexOf(l);
+			var els = getVector(ldata.data, index);
+			series.push({
+				name : l,
+				pointInterval : ldata.meta.step * 1000,
+				data : els,
+				pointStart: Date.now() - delta*1000
+			});
+		});
+		showChart(series, ldata.meta.step, service, container, delta);
+	});
+	h.error(function(res) {
+		$("#" + container).val(res);
+	});
 }
 
 
 function getVector(data, index) {
 	var res = [];
-	for (i =0; i<ldata.data.length; i++) {
-		res.push(ldata.data[i][index]);
+	for (i =0; i<data.length; i++) {
+		res.push(data[i][index]);
 	}
 	return res;
 }

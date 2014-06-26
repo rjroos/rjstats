@@ -193,9 +193,9 @@ sort($servicegroups);
 <head>
 <title>RJStats graphs.</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
-<script src="js/jquery-2.1.1.min.js"></script> 
+<script src="js/jquery-2.1.1.min.js"></script>
 <script src='js/min.jquery.saveit.js'></script>
-<script src="js/highcharts.js"></script>    
+<script src="js/highcharts.js"></script>
 <script src='stats.js'></script>
 
 <script type='text/javascript'>
@@ -282,8 +282,8 @@ function updateServices() {
 	if ($(oServices).find("option:selected")) {
 		$(oServices).attr("scrollTop", 17 * $(oServices).find("option:selected").attr("index"));
 	}
-
 }
+
 function getCharts() {
 	<?php
 		$timespan = $_REQUEST['timespan'];
@@ -467,16 +467,18 @@ function doComputer($computer) {
 		$timespan = -$timespan * $timerepeat;
 	}
 	$start = time() - $timespan;
-	foreach(param("services", array()) as $service) {
+	foreach (param("services", array()) as $service) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
-		if(file_exists($f)) {
+		if (file_exists($f)) {
 			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
-                        if ($_REQUEST['oldstyle'] == "on") {
-                                echo("<p><img src='view.php?computer=$computer&amp;service=$service&amp;start=$start' alt='".getNiceHost($computer)." - $service' /><br/>\n");
-                        } else {
-				# we willen een default hashing-achtige truuk zodat alle host/service combo's een id hebben zonder / en andere grappen erin
-                                echo("<div id='".base64_encode($computer.$service)."' class='rjchart'></div>");
-                        }
+			if ($_REQUEST['oldstyle'] == "on") {
+				$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
+				echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
+			} else {
+				# we willen een default hashing-achtige truuk zodat alle host/service combo's 
+				# een id hebben zonder / en andere grappen erin
+				echo("<div id='".base64_encode($computer.$service)."' class='rjchart'></div>");
+			}
 		}
 	}
 }
