@@ -62,6 +62,11 @@ function showChart(aSeries, interval, service, $container, starttime) {
 			},
 			labels: {
 				maxStaggerLines: 1
+			},
+			plotBands: {
+				color: 'lightgrey',
+				from: Date.now() - interval*1000,
+				to: Date.now()
 			}
 		},
 		yAxis: {
