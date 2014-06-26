@@ -1,11 +1,11 @@
-function fetchChart(computer, service, delta) {
+function fetchChart(computer, service, starttime) {
 	var $container = $("#" + btoa(computer+service).split("=").join("\\="));
 	if ($container.length == 0) {
 		console.error("container not found: " + $container.selector);
 		return;
 	}
 
-	var url = "jsonview.php?computer="+ computer +"&timedelta="+delta+"&service="+service;
+	var url = "jsonview.php?computer=" + computer + "&start=" + starttime + "&service=" + service;
 	jQuery.get(url, function(result) {
 		if (result.error) {
 			$err = $("<div style='color:red'/>").appendTo($container).text(result.error);
@@ -20,10 +20,10 @@ function fetchChart(computer, service, delta) {
 				name : l,
 				pointInterval : result.meta.step * 1000,
 				data : els,
-				pointStart: Date.now() - delta*1000
+				pointStart: starttime * 1000
 			};
 		});
-		showChart(series, result.meta.step, service, $container, delta);
+		showChart(series, result.meta.step, service, $container, starttime);
 	}, "json");
 }
 
@@ -37,7 +37,7 @@ function getVector(data, index) {
 }
 
 
-function showChart(aSeries, interval, service, $container, delta) {
+function showChart(aSeries, interval, service, $container, starttime) {
 	Highcharts.setOptions({
 		global: {
 			useUTC: false

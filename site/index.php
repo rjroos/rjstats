@@ -49,6 +49,17 @@ function sort_hostname($a, $b) {
 	$strb = getNiceHost($b);
 	return strnatcmp($stra, $strb);
 }
+
+function getStarttime() {
+	$timespan = $_REQUEST['timespan'] or 3600*24*31;
+	if ($timespan < 0) {
+		$timerepeat = param("timerepeat", 1);
+		$timespan = -$timespan * $timerepeat;
+	}
+	$start = time() - $timespan;
+	return $start;
+}
+
 usort($computers, "sort_hostname");
 sort($services);
 sort($servicegroups);
@@ -134,10 +145,9 @@ function updateServices() {
 
 function getCharts() {
 	<?php
-		$timespan = $_REQUEST['timespan'];
 		foreach (param("computers", array()) as $comp) {
 			foreach (param("services", array()) as $serv) {
-				echo "fetchChart('$comp', '$serv', $timespan);";
+				printf("fetchChart('%s', '%s', %d);\n", $comp, $serv, getStarttime());
 			}
 		}
 	?>
@@ -303,14 +313,7 @@ function radio($var, $lbl) {
 <div class="statswrapper">
 <?
 function doComputer($computer) {
-	$timespan = $_REQUEST['timespan'] or 3600*24*31;
-	if ($timespan < 0) {
-		$timerepeat = (isset($_REQUEST['timerepeat'])
-							? $_REQUEST['timerepeat']
-							: 1);
-		$timespan = -$timespan * $timerepeat;
-	}
-	$start = time() - $timespan;
+	$start = getStarttime();
 	foreach (param("services", array()) as $service) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
 		if (file_exists($f)) {
