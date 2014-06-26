@@ -193,10 +193,10 @@ sort($servicegroups);
 <head>
 <title>RJStats graphs.</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script> 
-<script type='text/javascript' src='http://jackbliss.co.uk/projects/localstorage/min.jquery.saveit.js'></script>
-<script src="http://code.highcharts.com/highcharts.js"></script>    
-<script type='text/javascript' src='stats.js'></script>
+<script src="js/jquery-2.1.1.min.js"></script> 
+<script src='js/min.jquery.saveit.js'></script>
+<script src="js/highcharts.js"></script>    
+<script src='stats.js'></script>
 
 <script type='text/javascript'>
 $(document).ready(function() {
@@ -488,15 +488,8 @@ if(isset($_REQUEST['timespan'])) {
 }
 ?>
 <p>
-<a href='http://rjstats.sourceforge.net/' target='rjstats.sf.net'>rjstats</a> - UNIX monitoring
+<a href='http://rjstats.sourceforge.net/' target='_blank'>rjstats</a> - UNIX monitoring
 <p>
-<a href="http://validator.w3.org/check?uri=referer"><img
-    src="http://www.w3.org/Icons/valid-html401"
-    alt="Valid HTML 4.01!" height="31" width="88"></a>
-<a href="http://jigsaw.w3.org/css-validator/"><img
-  style="border: 0; width: 88px; height: 31px"
-    src="http://jigsaw.w3.org/css-validator/images/vcss" 
-    alt="Valid CSS!"></a>
 </div>
 </body>
 </html>
