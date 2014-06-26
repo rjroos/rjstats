@@ -85,25 +85,6 @@ function showService(aGroupsSelected, sService) {
 	return false;
 }
 
-function updateServices_oud() {
-	var f = document.forms['form'];
-	var aGroups = [];
-	var oGroup = f['servicegroups[]'];
-	for (var i = 0 ; i < oGroup.options.length ; i++) {
-		var oOption = oGroup.options[i];
-		if (oOption.selected) {
-			aGroups.push(oOption.text);
-		}
-	}
-	
-	var oServices = f['services[]'];
-	for (var i = 0 ; i < oServices.options.length ; i++) {
-		var oOption = oServices.options[i];
-		var sDisplay = showService(aGroups, oOption.text) ? "block" : "none";
-		oOption.style.display = sDisplay;
-	}
-}
-
 function updateServices() {
 	var f = document.forms['form'];
 	var aGroups = [];
