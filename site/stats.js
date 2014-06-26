@@ -63,6 +63,9 @@ function showChart(aSeries, interval, service, container, delta) {
 		},
 		plotOptions: {
 			pointInterval: interval,
+			series: {
+				animation: false
+			},
 			area: {
 				stacking: stacking,
 				marker: {
