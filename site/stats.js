@@ -42,6 +42,10 @@ function showChart(aSeries, interval, service, $container, starttime) {
 	Highcharts.setOptions({
 		global: {
 			useUTC: false
+		},
+		lang : {
+			decimalPoint: ',',
+			thousandsSep: '.'
 		}
 	});
 	var stacking = jQuery("#stacking").val();
@@ -99,7 +103,9 @@ function showChart(aSeries, interval, service, $container, starttime) {
 			}
 		},
 		tooltip: {
-			pointFormat: '{series.name}:<b>{point.y}</b>'
+			pointFormat: '{series.name}:<b>{point.y}</b><br/>',
+			valueDecimals : 2,
+			shared : true
 		},
 		series: aSeries
 	});
