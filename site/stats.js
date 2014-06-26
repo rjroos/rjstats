@@ -49,13 +49,13 @@ function showChart(aSeries, interval, service, $container, delta) {
 			type: 'area',
 			zoomType: 'xy',
 			plotshadow: true,
-			height: 300
+			height: 300,
+			spacingRight: 0
 		},
 		title: {
 			text: service
 		},
 		xAxis: {
-			tickInterval: interval * 1000,
 			type: 'datetime',
 			title: {
 				text: "date"
