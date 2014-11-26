@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ "`uname -s`" == "Linux" ]; then
+	count=$(netstat -s -p tcp | grep "segments retransmited" | awk '{print $1}')
+elif [ "`uname -s`" == "FreeBSD" ]; then
+	count=$(netstat -s -p tcp | grep "data packets (.* bytes) retransmitted" | awk '{print $1}')
+fi
+
+[ -z "$count" ] && exit
+
+
+echo "
+netstat.tcp_retransmited_packets.graph.title=Retransmited TCP packets
+netstat.tcp_retransmited_packets.graph.unit=packets
+
+netstat.tcp_retransmited_packets.line.total.label=Retransmited packets
+netstat.tcp_retransmited_packets.line.total.value=$count
+netstat.tcp_retransmited_packets.line.total.type=GAUGE
+
+
+netstat.tcp_retransmited_packetrate.graph.title=Retransmited packet rate
+netstat.tcp_retransmited_packetrate.graph.unit=packets/sec
+
+netstat.tcp_retransmited_packetrate.line.total.label=Total
+netstat.tcp_retransmited_packetrate.line.total.value=$count
+netstat.tcp_retransmited_packetrate.line.total.type=COUNTER
+"
