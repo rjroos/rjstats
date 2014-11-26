@@ -6,7 +6,10 @@ my $stats;
 open I, "df -m|";
 while(<I>) {
 	m#/dev/(\S+)\s+(\d+)\s+(\d+)\s+\d+# or next;
-	$stats->{$1} = [$2, $3];
+	my $disk = $1;
+	my $values = [$2, $3];
+	$disk =~ s#/#-#g;
+	$stats->{$disk} = $values;
 }
 close I;
 
