@@ -41,7 +41,8 @@ function getVector(data, index) {
 function showChart(aSeries, interval, service, $container, starttime, stacking) {
 	Highcharts.setOptions({
 		global: {
-			useUTC: false
+			useUTC: true,
+			timezoneOffset : 0
 		},
 		lang : {
 			decimalPoint: ',',
