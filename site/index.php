@@ -34,9 +34,27 @@ foreach($arr as $file) {
 $computers = array_unique($computers);
 $services  = array_unique($services);
 
+$HOSTNAMES = array();
+if (file_exists("/etc/rjstats/hosts.txt")) {
+	$f = fopen("/etc/rjstats/hosts.txt", "r");
+	if ($f) {
+		while (! feof($f)) {
+			$line = fgets($f);
+			if (preg_match("/^((?:\d+.){3}.\d+)\s+(\S+)/", $line, $m)) {
+				$HOSTNAMES[$m[1]] = $m[2];
+			}
+		}
+	}
+	fclose($f);
+}
+
 function getNiceHost($host) {
 	if (!strstr($host, ".")) {
 		return $host;
+	}
+	global $HOSTNAMES;
+	if (isset($HOSTNAMES[$host])) {
+		return $HOSTNAMES[$host];
 	}
 	return gethostbyaddr($host);
 }
