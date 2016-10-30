@@ -1,9 +1,13 @@
 * {
 	font-family:sans-serif;
 }
-select[multiple] {
-	height:300px;
-	min-width:150px;
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+td {
+	width: 25%;
+	padding: 10px;
 }
 li {
 	list-style:none;
@@ -36,4 +40,17 @@ div.savedsearchbox li {
 	width: 85%;
 	background: #eee;
 	padding: 30px;
+}
+
+input[name='filter-services'] {
+	border: 1px solid #666;
+	padding: 2px 5px;
+	display: block;
+	width:90%;
+}
+select[multiple] {
+	height:300px;
+	padding: 2px 5px;
+	margin: 2px 5px;
+	width: 90%;
 }

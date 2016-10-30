@@ -18,7 +18,6 @@ $arr = $f->getMatches();
 
 $computers = array();
 $services  = array();
-$servicegroups = array();
 foreach($arr as $file) {
 	$tmp = explode("/", $file);
 	$iSize = sizeof($tmp);
@@ -27,9 +26,6 @@ foreach($arr as $file) {
 	$sService = $group . "/" . $tmp[$iSize - 1];
 	$sService = substr($sService, 0, -4);
 	$services[] = $sService;
-	if (!in_array($group, $servicegroups)) {
-		$servicegroups[] = $group;
-	}
 }
 $computers = array_unique($computers);
 $services  = array_unique($services);
@@ -80,7 +76,6 @@ function getStarttime() {
 
 usort($computers, "sort_hostname");
 sort($services);
-sort($servicegroups);
 ?>
 <!DOCTYPE html>
 
@@ -96,7 +91,6 @@ sort($servicegroups);
 
 <script type='text/javascript'>
 $(document).ready(function() {
-	updateServices();
 	$('#savedsearches').loadit({def : 'Geen.'});
 });
 
@@ -112,53 +106,6 @@ function showService(aGroupsSelected, sService) {
 		}
 	}
 	return false;
-}
-
-function updateServices() {
-	var f = document.forms['form'];
-	var aGroups = [];
-	var oGroup = f['servicegroups[]'];
-	for (var i = 0 ; i < oGroup.options.length ; i++) {
-		var oOption = oGroup.options[i];
-		if (oOption.selected) {
-			aGroups.push(oOption.text);
-		}
-	}
-	
-	var oServices = f['services[]'];
-	var servicesToShow = [];
-	var servicesToHide = [];
-	for (var i = 0 ; i < oServices.options.length ; i++) {
-		var oOption = oServices.options[i];
-		if (showService(aGroups, oOption.text)) {
-			servicesToShow.push(oOption);
-		} else {
-			servicesToHide.push(oOption);
-		}
-	}
-
-	var oHiddenServices = f['hiddenServices[]'];
-	for (var i = 0; i < oHiddenServices.options.length; i++) {
-		var oOption = oHiddenServices.options[i];
-		if (showService(aGroups, oOption.text)) {
-			servicesToShow.push(oOption);
-		} else {
-			servicesToHide.push(oOption);
-		}
-	}
-
-	servicesToShow = servicesToShow.sort(function(oOption1, oOption2){ return oOption1.text.localeCompare(oOption2.text)});
-	servicesToHide = servicesToHide.sort(function(oOption1, oOption2){ return oOption1.text.localeCompare(oOption2.text)});
-
-	$(oServices).empty();
-	$(servicesToShow).each(function(i, oOption) { $(oServices).append(oOption); });
-
-	$(oHiddenServices).empty();
-	$(servicesToHide).each(function(i, oOption) { $(oHiddenServices).append(oOption); });
-
-	if ($(oServices).find("option:selected")) {
-		$(oServices).attr("scrollTop", 17 * $(oServices).find("option:selected").attr("index"));
-	}
 }
 
 function toggleFormMethod() {
@@ -209,7 +156,7 @@ function removeSearch(obj) {
 
 <table>
 	<tr>
-		<td>
+		<td style='width:20%'>
 			<select name="computers[]" multiple>
 			<? foreach($computers as $pc) {
 				$selected = '';
@@ -224,20 +171,8 @@ function removeSearch(obj) {
 			</select>
 		</td>
 
-		<td>
-			<select name="servicegroups[]" multiple onchange="updateServices()">
-			<? foreach($servicegroups as $sg) {
-				$selected = '';
-				if(@in_array($sg, $_REQUEST['servicegroups'])) {
-					$selected = " selected";
-				}
-			?>
-				<option<?= $selected ?>><?= $sg ?></option>
-			<? } ?>
-			</select>
-		</td>
-
-		<td>
+		<td style='width:50%'>
+			<input type='text' name='filter-services' placeholder='Filter'>
 			<select name="services[]" multiple>
 			<? foreach($services as $s) {
 				$selected = '';
@@ -247,8 +182,6 @@ function removeSearch(obj) {
 			?>
 				<option<?= $selected ?>><?= $s ?></option>
 			<? } ?>
-			</select>
-			<select name="hiddenServices[]" multiple style="display:none">
 			</select>
 		</td>
 
@@ -270,7 +203,7 @@ function radio($var, $lbl) {
 }
 
 ?>
-		<td>
+		<td style='width:15%'>
 			<ul>
 				<li><?= radio(3600,        "Last hour") ?></li>
 				<li><?= radio(3600*24,     "Last day") ?></li>
@@ -289,7 +222,7 @@ function radio($var, $lbl) {
 			<input type='submit' value="GET" />
 			<input type='submit' value="POST" onclick="toggleFormMethod()" />
 		</td>
-		<td>   
+		<td style='width:15%'>
 			<h3>Options</h3>
 			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if (@$_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
 		</td>

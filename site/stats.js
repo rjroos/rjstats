@@ -2,6 +2,16 @@ jQuery(function() {
 	$("div.rjchart").map(function(i, obj) {
 		fetchChart($(obj));
 	});
+
+	$("input[name='filter-services']").on("keyup", function(e) {
+		e.preventDefault();
+		var search = $(this).val().toLowerCase();
+		$("select[name='services[]'] option").map(function(i, obj) {
+			var val = $(obj).text().toLowerCase();
+			var show = val.indexOf(search) > -1;
+			$(obj).prop("hidden", ! show);
+		});
+	});
 });
 
 function fetchChart($container) {
