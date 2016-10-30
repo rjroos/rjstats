@@ -22,9 +22,18 @@ function fetchChart($container) {
 	var computer = $container.data("computer");
 	var service = $container.data("service");
 	var starttime = $container.data("starttime");
+	var spike_detect = $("input[name='spike_detect']").val();
 
-	var url = "jsonview.php?computer=" + computer + "&start=" + starttime + "&service=" + service;
-	jQuery.get(url, function(result) {
+	var d = jQuery.ajax({
+		url : 'jsonview.php',
+		data : {
+			computer : computer,
+			service : service,
+			start : starttime,
+			spike_detect : spike_detect
+		}
+	});
+	d.done(function(result) {
 		if (result.error) {
 			$err = $("<div style='color:red'/>").appendTo($container).text(result.error);
 			return;
@@ -43,7 +52,16 @@ function fetchChart($container) {
 			};
 		});
 		showChart(series, result.meta.step, service, $container, starttime, result.meta.stacked);
-	}, "json");
+
+		var str = [];
+		for (var key in result.meta.spikes) {
+			var count = result.meta.spikes[key]['removed'].length;
+			if (count > 0) {
+				str.push("Removed " + count + " spike points from " + key);
+			}
+		}
+		$container.append($("<span/>").text(str.join("<br/>")));
+	});
 }
 
 

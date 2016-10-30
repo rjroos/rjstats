@@ -224,6 +224,11 @@ function radio($var, $lbl) {
 		</td>
 		<td style='width:15%'>
 			<h3>Options</h3>
+			<label>
+				Percentage for trimmed mean spike detection
+				<input type='text' name='spike_detect' value='<?= param("spike_detect", 20) ?>' />
+			</label>
+			<hr/>
 			<label for="oldstyle">Legacy rrdtool graphs</label><input type="checkbox" name="oldstyle" id="oldstyle" <?php if (@$_REQUEST['oldstyle'] == "on") {echo 'checked';} ?> />
 		</td>
 	</tr>

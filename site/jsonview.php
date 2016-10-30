@@ -64,9 +64,56 @@ function isStackedGraph($rrdfile) {
 	return strpos(file_get_contents($phpFile), "'STACK:") !== FALSE;
 }
 
+function removeSpikes(&$json, $percentage) {
+
+	function trimmed_mean($data, $percentage) {
+		$percentage = min(99, max(0, $percentage));
+		sort($data);
+		$offset = floor(count($data) * $percentage / 100 / 2);
+		return array_splice($data, $offset, -$offset);
+	}
+
+	function stddev($sample) {
+		$mean = array_sum($sample) / count($sample);
+		foreach ($sample as $key => $num) {
+			$devs[$key] = pow($num - $mean, 2);
+		}
+		return sqrt(array_sum($devs) / (count($devs) - 1));
+	}
+
+	$json['meta']['spikes'] = array();
+
+	for ($i = 0 ; $i < count($json['meta']['legend']) ; $i++) {
+		$sname = $json['meta']['legend'][$i];
+		$json['meta']['spikes'][$sname] = array();
+		$sdata = array();
+		foreach ($json['data'] as $row) {
+			$sdata[] = $row[$i];
+		}
+		$sdata = trimmed_mean($sdata, $percentage);
+
+		$stddev = stddev($sdata);
+		$avg = array_sum($sdata) / count($sdata);
+
+		$json['meta']['spikes'][$sname]['avg'] = $avg;
+		$json['meta']['spikes'][$sname]['stddev'] = $stddev;
+		$json['meta']['spikes'][$sname]['removed'] = array();
+
+		foreach ($json['data'] as &$row) {
+			$val = $row[$i];
+			if ($val < ($avg - 10 * $stddev) ||
+					$val > ($avg + 10 * $stddev)) {
+				$row[$i] = null;
+				$json['meta']['spikes'][$sname]['removed'][] = $val;
+			}
+		}
+	}
+}
+
 $start = $_REQUEST["start"];
 $service  = @$_REQUEST['service'];
 $computer = @$_REQUEST['computer'];
+$spike_detect = (int) @$_REQUEST['spike_detect'];
 
 if(!is_numeric($start)) {
 	$start = time() - 24 * 3600 * 3;
@@ -89,6 +136,10 @@ $output = rj_exec(implode(" ", $command));
 $json = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
 $obj = $json->decode(implode(" ", $output));
 $obj['meta']['stacked'] = isStackedGraph($rrdfile);
+
+if ($spike_detect > 0) {
+	removeSpikes($obj, $spike_detect);
+}
 
 header('Content-type: application/json');
 echo json_encode($obj);
