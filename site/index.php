@@ -236,15 +236,17 @@ function doComputer($computer) {
 	$start = getStarttime();
 	foreach (param("services", array()) as $service) {
 		$f = RJSTATS_DATA."/".$computer."/$service.rrd";
-		if (file_exists($f)) {
-			echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
-			if (@$_REQUEST['oldstyle'] == "on") {
-				$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
-				echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
-			} else {
-				printf("<div data-computer='%1\$s' data-service='%2\$s' data-starttime='%3\$s' class='rjchart'>%1\$s - %2\$s</div>",
-						htmlentities($computer), htmlentities($service), $start);
-			}
+		if (! file_exists($f)) {
+			continue;
+		}
+
+		echo("<h4>" .getNiceHost($computer)." - $service</h4>\n");
+		if (@$_REQUEST['oldstyle'] == "on") {
+			$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
+			echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
+		} else {
+			printf("<div data-computer='%1\$s' data-service='%2\$s' data-starttime='%3\$s' class='rjchart'>%1\$s - %2\$s</div>",
+					htmlentities($computer), htmlentities($service), $start);
 		}
 	}
 }
