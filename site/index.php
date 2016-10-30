@@ -250,7 +250,7 @@ function doComputer($computer) {
 			$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
 			echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
 		} else {
-			printf("<div data-computer='%1\$s' data-service='%2\$s' data-starttime='%3\$s' class='rjchart'>%1\$s - %2\$s</div>",
+			printf("<div data-computer='%1\$s' data-service='%2\$s' data-starttime='%3\$s' class='rjchart'>%1\$s - %2\$s</div>\n",
 					htmlentities($computer), htmlentities($service), $start);
 		}
 	}

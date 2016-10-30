@@ -60,7 +60,7 @@ function fetchChart($container) {
 				str.push("Removed " + count + " spike points from " + key);
 			}
 		}
-		$container.append($("<span/>").text(str.join("<br/>")));
+		$container.append($("<span/>").html(str.join("<br/>")));
 	});
 }
 
