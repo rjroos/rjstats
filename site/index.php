@@ -82,13 +82,13 @@ usort($computers, "sort_hostname");
 sort($services);
 sort($servicegroups);
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
+
 <html>
 
 <head>
 <title>RJStats graphs.</title>
-<link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
+<link rel="stylesheet" type="text/css" href="stylesheet.css">
 <script src="js/jquery-2.1.1.min.js"></script>
 <script src='js/min.jquery.saveit.js'></script>
 <script src="js/highcharts.js"></script>
