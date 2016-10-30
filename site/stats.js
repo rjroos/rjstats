@@ -1,9 +1,17 @@
-function fetchChart(computer, service, starttime) {
-	var $container = $("#" + btoa(computer+service).split("=").join("\\="));
+jQuery(function() {
+	$("div.rjchart").map(function(i, obj) {
+		fetchChart($(obj));
+	});
+});
+
+function fetchChart($container) {
 	if ($container.length == 0) {
 		console.error("container not found: " + $container.selector);
 		return;
 	}
+	var computer = $container.data("computer");
+	var service = $container.data("service");
+	var starttime = $container.data("starttime");
 
 	var url = "jsonview.php?computer=" + computer + "&start=" + starttime + "&service=" + service;
 	jQuery.get(url, function(result) {

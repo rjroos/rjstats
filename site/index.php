@@ -161,16 +161,6 @@ function updateServices() {
 	}
 }
 
-function getCharts() {
-	<?php
-		foreach (param("computers", array()) as $comp) {
-			foreach (param("services", array()) as $serv) {
-				printf("fetchChart('%s', '%s', %d);\n", $comp, $serv, getStarttime());
-			}
-		}
-	?>
-}
-
 function toggleFormMethod() {
 	var f = document.forms['form'];
 	f.method = "POST";
@@ -203,7 +193,7 @@ function removeSearch(obj) {
 </script>
 </head>
 
-<body onload="getCharts()">
+<body>
 
 <div class="menuwrapper">
 <div class='savedsearchbox'>
@@ -319,9 +309,8 @@ function doComputer($computer) {
 				$url = "view.php?computer=$computer&amp;service=$service&amp;start=$start";
 				echo("<p><img src='$url' alt='".getNiceHost($computer)." - $service' /><br/>\n");
 			} else {
-				# we willen een default hashing-achtige truuk zodat alle host/service combo's 
-				# een id hebben zonder / en andere grappen erin
-				echo("<div id='".base64_encode($computer.$service)."' class='rjchart'></div>");
+				printf("<div data-computer='%1\$s' data-service='%2\$s' data-starttime='%3\$s' class='rjchart'>%1\$s - %2\$s</div>",
+						htmlentities($computer), htmlentities($service), $start);
 			}
 		}
 	}
