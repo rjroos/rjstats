@@ -4,6 +4,7 @@
 
 use warnings;
 use strict;
+use File::Temp qw/tempfile/;
 
 # use RRDs;
 
@@ -73,10 +74,10 @@ sub getLines {
 
 sub save {
 	my $self = shift;
-	if(!-f $self->_getFile()) {
+	if (!-f $self->_getFile()) {
 		$self->_create();
 	}
-	$self->_update();
+	return $self->_update();
 }
 
 sub print {
@@ -130,7 +131,7 @@ sub _update {
 	push @args, $self->{date}.":".join(":", values %tmpHash);
 	print "update @args\n" if $DEBUG;
 	#RRDs::update(@args) or die RRDs::error;
-	qx/rrdtool update @args/;
+	return "rrdtool update " . join(" ", @args);
 }
 
 # sub _info {
@@ -310,16 +311,23 @@ while(my $line = <STDIN>) {
 	}
 }
 
+my @cmds;
 foreach my $group (keys %{$graphs}) {
 	foreach my $name (keys %{$graphs->{$group}}) {
 		my $graph = $graphs->{$group}->{$name};
 		#$graph->print();
-		$graph->save();
+		push @cmds, $graph->save();
 		if(defined($WWWDIR)) {
 			$graph->writePHPfile();
 		}
 	}
 }
+
+my ($fh, $filename) = tempfile("/tmp/rjstatsXXXXXXX");
+print $fh join("\n", @cmds) . "\n";
+close($fh);
+system("sh $filename");
+unlink $filename;
 
 sub getGraph {
 	my $group = shift;
