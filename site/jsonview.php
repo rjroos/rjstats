@@ -68,9 +68,14 @@ function removeSpikes(&$json, $percentage) {
 
 	function trimmed_mean($data, $percentage) {
 		$percentage = min(99, max(0, $percentage));
+		$data = array_filter($data, function($obj) { return $obj !== NULL; });
 		sort($data);
 		$offset = floor(count($data) * $percentage / 100 / 2);
-		return array_splice($data, $offset, -$offset);
+		$result = array();
+		for ($i = $offset ; $i < count($data) - $offset ; $i++) {
+			$result[] = $data[$i];
+		}
+		return $result;
 	}
 
 	function stddev($sample) {
@@ -86,14 +91,19 @@ function removeSpikes(&$json, $percentage) {
 	for ($i = 0 ; $i < count($json['meta']['legend']) ; $i++) {
 		$sname = $json['meta']['legend'][$i];
 		$json['meta']['spikes'][$sname] = array();
-		$sdata = array();
+		$orig_sdata = array();
 		foreach ($json['data'] as $row) {
-			$sdata[] = $row[$i];
+			$orig_sdata[] = $row[$i];
 		}
-		$sdata = trimmed_mean($sdata, $percentage);
+		$sdata = trimmed_mean($orig_sdata, $percentage);
 
 		$stddev = stddev($sdata);
 		$avg = array_sum($sdata) / count($sdata);
+
+//		$json['meta']['spikes'][$sname]['sample'] = $sdata;
+//		$json['meta']['spikes'][$sname]['sample_size'] = count($sdata);
+//		$json['meta']['spikes'][$sname]['orig'] = $orig_sdata;
+//		$json['meta']['spikes'][$sname]['orig_size'] = count($orig_sdata);
 
 		$json['meta']['spikes'][$sname]['avg'] = $avg;
 		$json['meta']['spikes'][$sname]['stddev'] = $stddev;
@@ -101,11 +111,14 @@ function removeSpikes(&$json, $percentage) {
 
 		foreach ($json['data'] as &$row) {
 			$val = $row[$i];
-			if ($val < ($avg - 10 * $stddev) ||
-					$val > ($avg + 10 * $stddev)) {
-				$row[$i] = null;
-				$json['meta']['spikes'][$sname]['removed'][] = $val;
+			if ($val == null) {
+				continue;
 			}
+			if ($val >= ($avg - 10 * $stddev) && $val <= ($avg + 10 * $stddev)) {
+				continue;
+			}
+			$row[$i] = null;
+			$json['meta']['spikes'][$sname]['removed'][] = $val;
 		}
 	}
 }
