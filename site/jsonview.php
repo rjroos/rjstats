@@ -80,6 +80,7 @@ function removeSpikes(&$json, $percentage) {
 
 	function stddev($sample) {
 		$mean = array_sum($sample) / count($sample);
+		$devs = array();
 		foreach ($sample as $key => $num) {
 			$devs[$key] = pow($num - $mean, 2);
 		}
@@ -98,7 +99,7 @@ function removeSpikes(&$json, $percentage) {
 		$sdata = trimmed_mean($orig_sdata, $percentage);
 
 		$stddev = stddev($sdata);
-		$avg = array_sum($sdata) / count($sdata);
+		$avg = array_sum($sdata) / max(count($sdata), 1);
 
 //		$json['meta']['spikes'][$sname]['sample'] = $sdata;
 //		$json['meta']['spikes'][$sname]['sample_size'] = count($sdata);
