@@ -13,9 +13,12 @@ do
 done
 
 NR=`cat $TEMPFILE | grep -i "requests currently " | cut -f 1 -d'r'`
+if test -z "$NR" ; then
+	exit 0
+fi
 
 echo "services.apache.graph.title=Number of apache requests processed"
-echo "services.apache.graph.unit =requests"
+echo "services.apache.graph.unit=requests"
 echo "services.apache.line.count.value=$NR"
 echo "services.apache.line.count.type=GAUGE"
 
