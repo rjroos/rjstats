@@ -1,4 +1,4 @@
-<?
+<?php
 require("rjstats.conf.inc");
 $service  = @$_REQUEST['service'];
 $computer = @$_REQUEST['computer'];

@@ -1,4 +1,4 @@
-<?
+<?php
 /* $Id: index.php,v 1.8 2009/04/09 10:37:56 rjroos Exp $ */
 error_reporting(E_ALL);
 require_once("rjstats.conf.inc");
@@ -158,7 +158,7 @@ function removeSearch(obj) {
 	<tr>
 		<td style='width:20%'>
 			<select name="computers[]" multiple>
-			<? foreach($computers as $pc) {
+			<?php foreach($computers as $pc) {
 				$selected = '';
 				$nice = getNiceHost($pc);
 				$pcs = @$_REQUEST['computers'];
@@ -167,25 +167,25 @@ function removeSearch(obj) {
 				}
 			?>
 				<option<?= $selected ?> value='<?= $pc ?>'><?= $nice ?></option>
-			<? } ?>
+			<?php } ?>
 			</select>
 		</td>
 
 		<td style='width:50%'>
 			<input type='text' name='filter-services' placeholder='Filter'>
 			<select name="services[]" multiple>
-			<? foreach($services as $s) {
+			<?php foreach($services as $s) {
 				$selected = '';
 				if(@in_array($s, $_REQUEST['services'])) {
 					$selected = " selected";
 				}
 			?>
 				<option<?= $selected ?>><?= $s ?></option>
-			<? } ?>
+			<?php } ?>
 			</select>
 		</td>
 
-<?
+<?php
 function radio($var, $lbl) {
 	$selected = '';
 	if(!isset($_REQUEST['timespan'])) {
@@ -236,7 +236,7 @@ function radio($var, $lbl) {
 </form>
 </div>
 <div class="statswrapper">
-<?
+<?php
 function doComputer($computer) {
 	$start = getStarttime();
 	foreach (param("services", array()) as $service) {
