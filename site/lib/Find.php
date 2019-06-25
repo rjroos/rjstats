@@ -9,7 +9,7 @@ class Find {
 	// unimplemented.
 	var $_type          = 'file';  // file or directory
 
-	function Find($dir) {
+	function __construct($dir) {
 		$this->_dir = $dir;
 	}
 
